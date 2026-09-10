@@ -1,0 +1,264 @@
+name: design-before-code
+version: 1
+description: >
+  OpenSpec workflow that inserts Design Before Code business, UX, data, and
+  readiness artifacts before behavior specs, technical design, tasks, and apply.
+  Companion skills required: business-domain-design, ux-flow-design,
+  data-model-design, design-readiness-review.
+
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    description: Change intent, scope, actors, and known constraints
+    template: proposal.md
+    instruction: |
+      Create a concise proposal for the requested change.
+
+      Focus on:
+      - why the change is needed;
+      - business scope and non-scope;
+      - actors/stakeholders;
+      - known constraints and relevant existing capabilities;
+      - source material / requirement references;
+      - candidate capability areas for later OpenSpec specs.
+
+      Do not design pages, tables, APIs, classes, or implementation architecture here.
+      Do not silently resolve consequential business ambiguity.
+    requires: []
+
+  - id: business-model
+    generates: business-model.md
+    description: Reviewable business/domain model before UX or data design
+    template: business-model.md
+    instruction: |
+      PRECHECK — required skill availability:
+      Confirm the `business-domain-design` skill is available in the current
+      agent environment. If it is missing, STOP and tell the user to install or
+      expose the Design Before Code skills. Do not silently replace the skill
+      with a generic domain-modeling answer.
+
+      Read proposal.md and inspect relevant existing project context read-only.
+      Invoke `business-domain-design` and write its complete reviewable artifact
+      into this change's business-model.md, adapting only formatting to the
+      supplied template.
+
+      Preserve FACT / INFERENCE / RECOMMENDATION / ASSUMPTION /
+      DECISION REQUIRED provenance.
+
+      If the skill concludes NEEDS HUMAN DECISION or NOT READY, still record the
+      artifact and its blockers. Downstream artifacts must not silently resolve
+      those blockers.
+    requires:
+      - proposal
+
+  - id: ux-flow
+    generates: ux-flow.md
+    description: Task-first UX flow and state contract
+    template: ux-flow.md
+    instruction: |
+      PRECHECK — required skill availability:
+      Confirm the `ux-flow-design` skill is available. If missing, STOP and
+      tell the user to install or expose the Design Before Code skills. Do not
+      silently fall back to CRUD page generation.
+
+      Read proposal.md and business-model.md.
+
+      Before creating ux-flow.md, inspect the business-model human review gate.
+      If a DECISION REQUIRED item explicitly blocks user flow, permissions,
+      lifecycle transitions, destructive behavior, or information architecture,
+      STOP and ask the human to resolve that upstream decision first. Do not
+      create ux-flow.md by guessing.
+
+      Otherwise invoke `ux-flow-design` and write the result to ux-flow.md.
+      Preserve unresolved non-blocking assumptions and record downstream
+      data/API implications created by UX promises.
+    requires:
+      - business-model
+
+  - id: data-model
+    generates: data-model.md
+    description: Conceptual, logical, physical-candidate, temporal data design
+    template: data-model.md
+    instruction: |
+      PRECHECK — required skill availability:
+      Confirm the `data-model-design` skill is available. If missing, STOP and
+      tell the user to install or expose the Design Before Code skills. Do not
+      silently fall back to direct SQL/schema generation.
+
+      Read proposal.md, business-model.md, and ux-flow.md.
+
+      If an upstream DECISION REQUIRED item materially changes identity, table
+      boundaries, lifecycle, historical semantics, uniqueness, canonical units,
+      or a UX promise that the data model must support, do not silently choose a
+      representation. Preserve the decision lock or STOP when the upstream
+      artifact explicitly marks the issue as blocking.
+
+      Invoke `data-model-design` and write the reviewable result to data-model.md.
+      Do not write migrations or implementation code.
+    requires:
+      - business-model
+      - ux-flow
+
+  - id: design-readiness
+    generates: design-readiness.md
+    description: Cross-artifact Business ↔ UX ↔ Data readiness review
+    template: design-readiness.md
+    instruction: |
+      PRECHECK — required skill availability:
+      Confirm the `design-readiness-review` skill is available. If missing,
+      STOP and tell the user to install or expose the Design Before Code skills.
+
+      Read proposal.md, business-model.md, ux-flow.md, and data-model.md.
+      Invoke `design-readiness-review`.
+
+      The FIRST non-comment line of design-readiness.md MUST be exactly one of:
+      READINESS: READY_FOR_HUMAN_APPROVAL
+      READINESS: NEEDS_DECISION
+      READINESS: NOT_READY
+
+      The review must compare artifacts rather than summarize them. Route each
+      blocker to the owning layer. Never self-approve implementation.
+    requires:
+      - business-model
+      - ux-flow
+      - data-model
+
+  - id: human-approval
+    generates: human-approval.md
+    description: Human-only approval contract for the reviewed product design
+    template: human-approval.md
+    instruction: |
+      HUMAN-ONLY ARTIFACT — DO NOT CREATE OR MODIFY THIS FILE AS AN AI AGENT.
+
+      Read design-readiness.md first.
+
+      If its first status line is not:
+      READINESS: READY_FOR_HUMAN_APPROVAL
+      STOP and explain that approval is unavailable until upstream blockers are
+      resolved and design-readiness is re-run.
+
+      If readiness is READY_FOR_HUMAN_APPROVAL, STOP and ask the human reviewer
+      to create `human-approval.md` manually using the provided template and to
+      set `APPROVAL: APPROVED` only after reviewing the current artifacts.
+
+      Never fill APPROVED_BY, APPROVED_AT, or APPROVAL on the user's behalf.
+    requires:
+      - design-readiness
+
+  - id: specs
+    generates: "specs/**/*.md"
+    description: OpenSpec delta behavior specifications derived from approved design
+    template: spec.md
+    instruction: |
+      Read human-approval.md and design-readiness.md before doing anything.
+
+      HARD WORKFLOW CHECK:
+      - design-readiness.md must contain `READINESS: READY_FOR_HUMAN_APPROVAL`.
+      - human-approval.md must contain an exact line `APPROVAL: APPROVED`.
+      If either check fails, STOP and do not create specs.
+
+      Read proposal.md, business-model.md, ux-flow.md, and data-model.md as
+      approved design context.
+
+      Create OpenSpec delta specifications that define observable behavior, not
+      implementation details. Derive capability boundaries from the approved
+      design rather than inventing them from code structure.
+
+      Use standard OpenSpec delta sections:
+      - ## ADDED Requirements
+      - ## MODIFIED Requirements
+      - ## REMOVED Requirements
+      - ## RENAMED Requirements
+
+      Each requirement must use `### Requirement: <name>` and have at least one
+      `#### Scenario: <name>` using WHEN/THEN behavior.
+
+      For a new capability, include a `## Purpose` section before ADDED
+      Requirements. For modified capabilities, use the exact existing capability
+      path under openspec/specs/ and include the full modified requirement block.
+
+      Do not reopen an approved product decision here. If a contradiction is
+      discovered, STOP and route it back through the owning Design Before Code
+      artifact, then re-run readiness and human approval.
+    requires:
+      - human-approval
+
+  - id: technical-design
+    generates: technical-design.md
+    description: Implementation architecture and technical decisions
+    template: technical-design.md
+    instruction: |
+      Read approved business-model.md, ux-flow.md, data-model.md, the generated
+      specs, and human-approval.md.
+
+      Explain HOW to implement the approved behavior without changing the
+      approved product semantics.
+
+      Include:
+      - technical context and constraints;
+      - goals / non-goals;
+      - architecture and integration decisions;
+      - API/service/module boundaries when relevant;
+      - data implementation notes referencing data-model.md rather than silently
+        redesigning it;
+      - security, concurrency, reliability, migration, and rollback considerations
+        when relevant;
+      - alternatives and trade-offs;
+      - open questions only when they are safely deferrable.
+
+      If a newly discovered question would change business semantics, UX flow,
+      data history, observable specs, or task scope, STOP and route it upstream
+      instead of encoding a new product decision here.
+    requires:
+      - specs
+      - data-model
+      - human-approval
+
+  - id: tasks
+    generates: tasks.md
+    description: Trackable implementation checklist for the approved change
+    template: tasks.md
+    instruction: |
+      Read human-approval.md and design-readiness.md first.
+
+      HARD WORKFLOW CHECK:
+      - design-readiness.md must contain `READINESS: READY_FOR_HUMAN_APPROVAL`.
+      - human-approval.md must contain an exact line `APPROVAL: APPROVED`.
+      If either check fails, STOP and do not create tasks.
+
+      Read specs and technical-design.md.
+
+      Create an implementation checklist. Every task MUST use `- [ ]` checkbox
+      syntax so OpenSpec can track progress. Group tasks under numbered headings,
+      order by dependency, keep tasks session-sized, and include a concrete
+      verification signal in each task or in an integration verification task.
+
+      Do not add work that changes approved semantics without first routing the
+      issue upstream and repeating readiness + approval.
+    requires:
+      - specs
+      - technical-design
+      - human-approval
+
+apply:
+  requires:
+    - tasks
+    - human-approval
+  tracks: tasks.md
+  instruction: |
+    Before implementation, read design-readiness.md and human-approval.md.
+
+    Refuse to implement unless BOTH are true:
+    - `READINESS: READY_FOR_HUMAN_APPROVAL`
+    - `APPROVAL: APPROVED`
+
+    Never create or modify human-approval.md yourself.
+
+    Then read the approved design artifacts, specs, technical-design.md, and
+    tasks.md. Implement only the approved scope, work through pending tasks,
+    verify each task, and mark completed checkboxes as you go.
+
+    If implementation reveals a contradiction with approved Business / UX /
+    Data semantics, pause implementation and route the issue back to the owning
+    artifact. Re-run design-readiness and obtain fresh human approval before
+    continuing if the approved semantics change.
