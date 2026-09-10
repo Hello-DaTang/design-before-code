@@ -57,13 +57,13 @@ It focuses on named-protagonist journeys, task-first information architecture, s
 
 It deliberately separates **how it works** from visual-brand/design-system work.
 
-### `data-model-design` v0.2.1
+### `data-model-design` v0.2.2
 
 [`skills/data-model-design/SKILL.md`](skills/data-model-design/SKILL.md)
 
 Designs and reviews a data model through decision provenance, conceptual/logical/physical candidates, temporal review, scenario simulation, design review, and a human gate.
 
-It synthesizes explicit data-model artifact discipline with normalization/constraint/access-pattern reasoning, then adds this project's temporal-business-time, transitive-redundancy, declarative-integrity, canonical-unit, and human-decision-lock behavior.
+It synthesizes explicit data-model artifact discipline with normalization/constraint/access-pattern reasoning, then adds this project's temporal-business-time, transitive-redundancy, declarative-integrity, canonical-unit, and human-decision-lock behavior. Its own readiness result is deliberately separated from cross-artifact readiness and implementation approval.
 
 ### `design-readiness-review` v0.2
 
@@ -109,6 +109,8 @@ The four Design Before Code skills remain independently usable. OpenSpec owns ar
 
 `human-approval.md` is a human-only contract. Because OpenSpec dependency edges are artifact-availability relationships rather than actor-authenticated approvals, stronger organizational enforcement requires an external CI/hook/review mechanism. The schema does not pretend otherwise.
 
+The bundle has passed OpenSpec 1.8.0 schema validation and a controlled Codex runtime smoke test: all four companion Skills were invoked, readiness reached `READY_FOR_HUMAN_APPROVAL`, and the agent stopped without creating `human-approval.md` or downstream artifacts.
+
 See the integration README for installation and lifecycle details.
 
 ## Evaluation
@@ -129,6 +131,7 @@ Current evals:
 - [`evals/business-domain-design.md`](evals/business-domain-design.md)
 - [`evals/ux-flow-design.md`](evals/ux-flow-design.md)
 - [`evals/data-model-design.md`](evals/data-model-design.md)
+- [`evals/data-model-design-gate.md`](evals/data-model-design-gate.md)
 - [`evals/design-readiness-review.md`](evals/design-readiness-review.md)
 
 ## Repository structure
@@ -166,6 +169,6 @@ The readiness reviewer is a **gate and router**, not a universal fourth designer
 
 ## Status
 
-Early experimental project — **4 of 4 core Skills have synthesized minimum usable versions, and the first OpenSpec orchestration bundle exists**.
+Early experimental project — **4 of 4 core Skills have synthesized minimum usable versions, and the first OpenSpec orchestration bundle has passed CLI and runtime smoke validation**.
 
-Current priority: validate the custom schema with a real OpenSpec CLI, then run one controlled end-to-end greenfield change through Business → UX → Data → Readiness → human approval → specs/design/tasks.
+Current priority: run approval-gate negative/positive checks, then perform one controlled end-to-end greenfield milestone validation through Business → UX → Data → Readiness → human approval → specs/design/tasks.
