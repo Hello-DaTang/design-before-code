@@ -16,15 +16,27 @@ AI coding agents are very good at implementation, but they can also make importa
 - introducing redundant fields without an explicit historical-data strategy;
 - shaping user flows around code structure instead of user intent;
 - adding architecture or schema complexity that the human reviewer never approved;
+- treating reasonable recommendations as if they were confirmed requirements;
+- using current master data to reconstruct historical events that happened earlier;
+- finalizing physical schema choices while the business decision is still unresolved;
 - discovering product decisions only after the MVP already exists.
 
 This project moves those decisions earlier and turns them into reviewable artifacts.
 
-## v0.1 scope
+## Current scope — data-model-design v0.2
 
 The first implemented skill is:
 
-- [`data-model-design`](skills/data-model-design/SKILL.md) — design and review a data model through conceptual, logical, physical, temporal, and scenario-validation stages before implementation.
+- [`data-model-design`](skills/data-model-design/SKILL.md) — design and review a data model through conceptual, logical, physical, temporal, scenario-validation, and human-gate stages before implementation.
+
+v0.2 specifically strengthens:
+
+- decision provenance: FACT / INFERENCE / RECOMMENDATION / ASSUMPTION / DECISION REQUIRED;
+- transitive and derived redundancy review, not only duplicate-column review;
+- business-effective time vs system recording time;
+- historical relationship references vs full value snapshots;
+- adversarial late-entry/backdated scenario simulation;
+- physical-model decision locks when material business semantics are unresolved.
 
 Planned skills:
 
@@ -39,12 +51,14 @@ Planned skills:
 
 A data model should become understandable in this order:
 
-1. Conceptual model — what exists in the real world?
-2. Logical model — what identities, relationships, rules, and lifecycles exist?
-3. Physical model — how should the model be represented in the target database?
-4. Temporal review — what must remain historically true when current data changes?
-5. Scenario simulation — does the model survive a realistic business example?
-6. Human review gate — unresolved assumptions and consequential design choices remain visible before coding.
+1. Context and decision provenance — what is fact, inference, recommendation, assumption, or a human decision?
+2. Conceptual model — what exists in the real world?
+3. Logical model — what identities, relationships, rules, and lifecycles exist?
+4. Physical model candidates — how could the approved semantics be represented in the target database?
+5. Temporal review — what must remain historically true, and at what business-effective time?
+6. Scenario simulation — does the model survive realistic mutations, late entry, and backdated correction?
+7. Design review — are redundancy, integrity, lifecycle, and unresolved decisions visible?
+8. Human review gate — unresolved consequential choices remain blocked before coding.
 
 ## Repository structure
 
@@ -60,6 +74,7 @@ design-before-code/
 │   └── manufacturing/
 ├── evals/
 ├── ATTRIBUTION.md
+├── CHANGELOG.md
 ├── LICENSE
 └── README.md
 ```
@@ -84,6 +99,23 @@ meeting notes / requirements
 
 Design Before Code does not try to replace OpenSpec, Spec Kit, BMAD, or other specification systems. The intended long-term direction is to provide reusable design intelligence that can be called independently or orchestrated by tools such as OpenSpec.
 
+## Evaluation philosophy
+
+The project does not evaluate a skill by checking whether it produces one canonical schema.
+
+Instead, evaluations ask whether the agent:
+
+- exposes consequential ambiguity before implementation;
+- distinguishes requirements from its own recommendations;
+- detects redundant and contradictory representations;
+- preserves historical business meaning under time and mutation;
+- avoids premature physical decisions;
+- produces artifacts a normal application developer can challenge and approve.
+
+See [`evals/data-model-design.md`](evals/data-model-design.md) for the current regression suite.
+
 ## Status
 
-Early experimental v0.1. The current goal is to validate the workflow on real enterprise CRUD and moderately complex business systems before expanding the skill set.
+Early experimental **data-model-design v0.2**.
+
+v0.2 was driven by an A/B evaluation against a strong no-skill baseline. The current goal is to keep using concrete regression cases before expanding into business-domain and UX skills.
