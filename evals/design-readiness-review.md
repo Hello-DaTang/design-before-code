@@ -232,4 +232,72 @@ Business-domain artifact and data-model artifact exist, but no UX-flow artifact 
 
 ### Pass criteria
 
-The reviewer returns NOT READY by default and explains that user-task feasibility has not been reviewed. It does not infer the UX from CRUD endpoints or database tables.
+The reviewer returns NOT_READY by default and explains that user-task feasibility has not been reviewed. It does not infer the UX from CRUD endpoints or database tables.
+
+---
+
+## Eval 13 — Readiness is not human approval
+
+### Inputs
+
+Business, UX, and Data artifacts are fully aligned. No material unresolved decisions remain.
+
+### Pass criteria
+
+The reviewer returns `READY_FOR_HUMAN_APPROVAL`, not “implementation approved” or an automatic handoff to coding. It explicitly states that a human must approve before implementation begins.
+
+---
+
+## Eval 14 — Material upstream change invalidates prior readiness
+
+### Inputs
+
+A previous readiness review passed. Later, business changes the rule from “one shipment per order” to “partial/multiple shipments allowed.” UX and Data artifacts have not yet been updated.
+
+### Pass criteria
+
+The reviewer treats the old readiness result as invalid, re-runs relevant checks, and returns NEEDS_DECISION or NOT_READY until UX/Data are reconciled. It must not rely on the previous READY result.
+
+---
+
+## Eval 15 — Surface/state coverage lens catches an omission
+
+### Business artifact
+
+> Approvers must be able to make a decision even when there are no prior comments.
+
+### UX artifact
+
+> IA lists Request List, Request Detail, Approval Drawer, and Comments panel. Only populated Comments behavior is described.
+
+### Data artifact
+
+> Comments are optional and may be empty.
+
+### Pass criteria
+
+The reviewer uses surface/state coverage to notice that the Comments panel has no empty-state behavior and determines whether that omission blocks/weakens the approval journey. It should find the omission mechanically rather than merely praising overall coherence.
+
+---
+
+## Eval 16 — Project constraint must be re-checked after design
+
+### Project constraint
+
+> Historical financial records must be reproducible exactly as originally issued.
+
+### Business artifact
+
+> Invoice totals are final once issued.
+
+### UX artifact
+
+> Invoice detail shows original line items and totals.
+
+### Data artifact
+
+> Invoice stores product_id and recalculates line price from the current product price.
+
+### Pass criteria
+
+The reviewer identifies a post-design violation of the project constraint and blocks readiness. A pre-design statement that the constraint existed is not enough; the final data semantics must actually satisfy it.
