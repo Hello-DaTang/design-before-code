@@ -2,7 +2,7 @@
 
 Design and review an application data model before implementation. Optimize for human reviewability first, database correctness second, and implementation convenience third.
 
-**Current behavior target: v0.2.**
+**Current behavior target: v0.2.1.**
 
 ## When to use
 
@@ -17,6 +17,8 @@ Do not use it as a full legacy-database reverse-engineering or migration framewo
 3. **Do not finalize a physical representation while a material business decision that changes that representation is unresolved.**
 4. **Do not accept duplicated or transitively derivable facts without an explicit redundancy review.**
 5. **Do not claim historical correctness without distinguishing business-effective time from system recording time.**
+6. **Do not claim a duplicated fact cannot be protected by the database until declarative integrity options in the target database have been considered.**
+7. **Do not treat input/display units as an approved canonical storage unit when calculations or precision depend on that choice.**
 
 Before implementation, make the design visible in this sequence:
 
@@ -49,7 +51,7 @@ For consequential statements, distinguish these categories:
 - **INFERENCE** — logically derived from stated facts.
 - **RECOMMENDATION** — a design choice proposed by the agent.
 - **ASSUMPTION** — a provisional choice made only to continue analysis.
-- **DECISION REQUIRED** — a human/business choice whose answer materially changes identity, table boundaries, cardinality, historical semantics, uniqueness, or lifecycle.
+- **DECISION REQUIRED** — a human/business choice whose answer materially changes identity, table boundaries, cardinality, historical semantics, uniqueness, lifecycle, or canonical data representation.
 
 A recommendation must never be presented as if the business already approved it.
 
@@ -113,14 +115,28 @@ For every stored foreign key or business attribute that may be derivable through
 1. Can this value be derived transitively from another stored value?
 2. If both are stored, can they contradict each other?
 3. What is the authoritative source of truth?
-4. What concrete performance, historical, integration, or integrity reason justifies duplication?
-5. Can the database enforce consistency, or would correctness depend only on application code?
+4. What concrete performance, historical, integration, partitioning, uniqueness, or integrity reason justifies duplication?
+5. What declarative mechanisms in the target database could enforce consistency if both remain?
+
+Before saying "the database cannot enforce this," consider applicable mechanisms such as composite foreign keys backed by composite UNIQUE keys, CHECK constraints, generated columns, exclusion/partial constraints where supported, or a different key design. State target-database limitations precisely rather than generically.
 
 Example pattern to challenge:
 
 `production_record.product_id` plus `production_record.product_version_id` when `product_version_id -> product_id` already determines the product.
 
-If both are kept, classify the duplication and justify it. Otherwise prefer the non-redundant representation.
+If both are kept, classify the duplication, identify the source of truth, and show how contradictions are prevented. Otherwise prefer the non-redundant representation.
+
+Redundancy review is not automatic redundancy rejection: a duplicate may be justified if its invariant is explicit and enforceable enough for the risk it introduces.
+
+#### Canonical units and quantities
+
+When two values participate in calculations, comparisons, constraints, or aggregation, distinguish:
+
+- the unit users enter;
+- the unit users see;
+- the canonical unit stored or normalized for computation.
+
+If choosing seconds vs hours, cents vs decimal currency, grams vs kilograms, or another canonical representation affects type, precision, rounding, constraints, or interoperability, treat it as **DECISION REQUIRED** unless already specified. Do not finalize the physical field/type merely because the requirement examples use a particular display/input unit.
 
 #### Decision lock
 
@@ -132,7 +148,7 @@ Instead do one of these:
 - mark the affected table/column as **BLOCKED BY Dn**;
 - defer that physical detail until the human decision is made.
 
-Do not write a concrete column such as `actual_work_hours DECIMAL(...)` while simultaneously saying the storage unit is still undecided.
+Do not write a concrete column such as `actual_work_hours DECIMAL(...)` while simultaneously saying the canonical storage unit is still undecided.
 
 SQL may be included here if useful, but SQL is not the primary artifact.
 
@@ -145,14 +161,26 @@ First distinguish:
 - **Business-effective time** — when the real-world fact was true or the business event occurred.
 - **System recording time** — when the row was inserted or updated in the system.
 
-Do not assume these are the same. Late entry, backdated correction, imports, and delayed approval can make them different.
+Do not assume these are the same. Late entry, backdated correction, imports, delayed approval, and retroactive correction can make them different.
 
-Then classify the historical strategy precisely:
+For each mutable fact, also distinguish **why** it changes:
 
-- **Current identity reference** — keep a stable identity and intentionally show current mutable labels/attributes.
+- **prospective business change** — the world changes from a stated effective time forward;
+- **retroactive correction** — the system learns that a past fact was recorded incorrectly;
+- **current-value reinterpretation** — the business intentionally wants old reports/calculations to use the latest current definition;
+- **original-applied preservation** — old events must keep the exact value/definition actually applied at the time.
+
+These semantics are different. Do not use effective-dated history as a generic answer to every mutable fact, and do not assume historical stability is always desired.
+
+Then classify the storage/history strategy precisely:
+
+- **Current identity/reference** — keep stable identity and intentionally resolve current mutable attributes.
 - **Historical relationship reference** — preserve which related entity was associated with the event, without freezing all attributes of that entity.
-- **Value snapshot** — copy the exact value applied at the business-effective time.
-- **Effective-dated history** — store versions/relationships with validity periods so the system can reconstruct the past.
+- **Value snapshot** — copy the exact value applied at business-effective time.
+- **Effective-dated history** — store versions/relationships with validity periods so the system can reconstruct what was effective at a past business time.
+- **Recorded-change/audit history** — preserve when the system learned or changed a fact when that distinction matters.
+
+If both "what was effective then?" and "what did the system believe then?" matter, flag the need to model both valid time and transaction/recording time rather than pretending one timestamp answers both questions.
 
 Be precise with terminology: storing `dept_id` may preserve the department relationship, but it is not a full department-value snapshot if the department name is still read from mutable master data.
 
@@ -180,9 +208,10 @@ For models involving mutable ownership, organizational assignment, pricing, stan
 
 - business event occurs, related master data changes, then the event is entered late;
 - backdated correction after a version/department/rate change;
+- prospective rate/standard change followed by a historical query;
 - master-data rename or reclassification;
 - deactivation or organizational restructuring;
-- parameter change followed by a historical query.
+- intentional "recalculate history using latest value" policy.
 
 If the scenario reveals a contradiction, revise the model before recommending implementation.
 
@@ -196,13 +225,15 @@ Call out specifically:
 
 - redundant fields or tables;
 - **transitively derivable fields** and duplicated business facts;
-- contradictory foreign-key paths;
+- contradictory foreign-key paths and whether declarative constraints can prevent them;
 - ambiguous ownership;
 - many-to-many relationships without an explicit associative concept;
 - missing uniqueness constraints;
-- history that could be rewritten accidentally;
+- history that could be rewritten accidentally or intentionally;
+- confusion between prospective change, retroactive correction, and latest-value reinterpretation;
 - confusion between business-effective time and recording time;
 - reference identity mislabeled as a full snapshot;
+- unresolved canonical units already embedded in physical fields;
 - unresolved decisions already embedded in the physical schema;
 - tables created only to satisfy UI layout or code structure;
 - speculative extensibility;
@@ -228,8 +259,10 @@ Do not self-approve unresolved product or business decisions.
 - Data integrity should not depend only on application code when the database can enforce the rule safely.
 - Normalize to a clear baseline before intentional denormalization.
 - Trace transitive dependencies, not only duplicate column names.
-- Historical truth must be designed around business-effective time, not merely row timestamps.
+- Explore declarative integrity mechanisms before declaring an invariant unenforceable in the database.
+- Historical truth must be designed around business-effective time and change semantics, not merely row timestamps.
 - A stable foreign-key identity is not automatically a value snapshot.
+- Input/display units are not automatically canonical storage units.
 - Avoid speculative flexibility. Design for known variation and make unknown variation visible.
 - Keep unresolved decisions unresolved in the physical model rather than quietly choosing for the user.
 - Optimize the explanation so a normal application developer can review it without being a DBA.
