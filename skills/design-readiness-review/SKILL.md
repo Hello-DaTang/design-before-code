@@ -1,3 +1,8 @@
+---
+name: design-readiness-review
+description: Cross-review business, UX, and data-model artifacts for consistency and readiness before human approval and implementation.
+---
+
 # design-readiness-review
 
 Cross-review business-domain, UX-flow, and data-model artifacts before implementation. The goal is not to summarize each artifact, but to determine whether they describe the same product and whether implementation can begin safely.
