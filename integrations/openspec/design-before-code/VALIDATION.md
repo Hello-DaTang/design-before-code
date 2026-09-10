@@ -101,22 +101,86 @@ Design Before Code semantic approval gate: BLOCKED
 
 Artifact existence alone is therefore not treated as product approval by the agent workflow.
 
-## 4. Observed integration correction
+## 4. Positive semantic approval path — PASS
+
+The human reviewer then changed the approval artifact manually to:
+
+```text
+APPROVAL: APPROVED
+```
+
+and recorded reviewer/time information.
+
+The runtime agent re-read both gate artifacts and observed:
+
+```text
+READINESS: READY_FOR_HUMAN_APPROVAL
+APPROVAL: APPROVED
+```
+
+It then proceeded one artifact at a time through the approved post-gate planning path:
+
+- `specs/product-category-maintenance.md`
+- `technical-design.md`
+- `tasks.md`
+
+Observed behavior:
+
+- specs were derived from the approved Business / UX / Data design;
+- technical design did not change approved product semantics;
+- tasks were generated only after specs and technical design existed;
+- `human-approval.md` was not modified by the agent;
+- `apply` was not executed;
+- no application source code was created or modified.
+
+Final OpenSpec status:
+
+```text
+Progress: 9/9 artifacts complete
+
+[x] proposal
+[x] business-model
+[x] ux-flow
+[x] data-model
+[x] design-readiness
+[x] human-approval
+[x] specs
+[x] technical-design
+[x] tasks
+```
+
+This validates the intended planning boundary:
+
+```text
+missing approval → blocked
+PENDING approval → semantically blocked
+human APPROVED → specs → technical-design → tasks
+planning complete ≠ apply / implementation started
+```
+
+## 5. Observed integration correction
 
 The first runtime data-model artifact ended with the phrase `Ready to implement`, inherited from `data-model-design v0.2.1`.
 
 That wording was too strong inside the multi-artifact workflow because data-model readiness is not cross-artifact readiness and is not human approval.
 
-The Skill was corrected so its standalone positive result is now scoped to downstream design rather than implementation permission. A focused regression case was added instead of rerunning the full benchmark.
+The Skill was corrected in `data-model-design v0.2.2` so its standalone positive result is scoped to downstream technical design rather than implementation permission. A focused regression case was added instead of rerunning the full benchmark.
 
-## Remaining Phase C validation
+## Phase C result
 
-One positive approval-path smoke test remains:
+**PASS at the current experimental level.**
 
-1. a human changes `human-approval.md` to an explicit `APPROVAL: APPROVED` and records reviewer/time;
-2. `specs` is generated from the approved artifacts;
-3. `technical-design` is generated after specs;
-4. `tasks` is generated after technical design;
-5. the test stops before `apply` and confirms no implementation was started.
+Validated with OpenSpec 1.8.0:
 
-If this path passes, Phase C OpenSpec orchestration can be considered complete at the experimental level and the project can move to its first Level 3 end-to-end domain benchmark.
+1. schema discovery and parsing;
+2. template and dependency-graph validation;
+3. runtime delegation to all four Design Before Code Skills;
+4. stop at the human-only approval artifact;
+5. semantic rejection of `APPROVAL: PENDING` even when OpenSpec structurally unlocks specs;
+6. semantic acceptance of a human-authored `APPROVAL: APPROVED`;
+7. approved progression through specs → technical design → tasks;
+8. separation of planning completion from `apply` / coding.
+
+The schema still does **not** provide actor-authenticated or cryptographic proof that an approval file was written by a human. Stronger organizational enforcement remains an optional future CI/hook/review concern.
+
+Next milestone: one Level 3 end-to-end greenfield domain benchmark that exercises the full workflow on a realistic, moderately complex requirement rather than a simple orchestration smoke case.
