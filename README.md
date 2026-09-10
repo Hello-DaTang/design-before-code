@@ -45,7 +45,7 @@ The detailed mechanism → adaptation map, including what is intentionally exclu
 
 Turns rough requirements and meeting notes into a reviewable business model before UX, data, API, or code design.
 
-It now includes a **Plain CRUD / Light Domain Modeling / Deep Domain Discovery** gate, optional Event Storming-lite, ubiquitous-language clarification, lifecycle/event/rule modeling, and explicit downstream constraints without forcing tactical DDD.
+It includes a **Plain CRUD / Light Domain Modeling / Deep Domain Discovery** gate, optional Event Storming-lite, ubiquitous-language clarification, lifecycle/event/rule modeling, and explicit downstream constraints without forcing tactical DDD.
 
 ### `ux-flow-design` v0.2
 
@@ -75,31 +75,41 @@ It applies coverage lenses, decision-ledger reconciliation, lifecycle/state/even
 
 The agent cannot approve implementation on the human's behalf.
 
-## First complete workflow
+## OpenSpec orchestration
+
+An experimental custom schema bundle now lives at:
+
+[`integrations/openspec/design-before-code/`](integrations/openspec/design-before-code/)
+
+It orchestrates:
 
 ```text
-meeting notes / requirements
-          ↓
-business-domain-design
-          ↓
-    human review
-          ↓
-    ux-flow-design
-          ↓
-    human review
-          ↓
-   data-model-design
-          ↓
-    human review
-          ↓
-design-readiness-review
-          ↓
- explicit human approval
-          ↓
- OpenSpec / implementation
+proposal
+  ↓
+business-model
+  ↓
+ux-flow
+  ↓
+data-model
+  ↓
+design-readiness
+  ↓
+human-approval
+  ↓
+specs
+  ↓
+technical-design
+  ↓
+tasks
+  ↓
+apply
 ```
 
-The four Skills remain independently usable. OpenSpec is intended to orchestrate the artifacts later, not define the core product.
+The four Design Before Code skills remain independently usable. OpenSpec owns artifact orchestration and keeps its native behavior-spec / technical-design / tasks / apply workflow after the product-design approval boundary.
+
+`human-approval.md` is a human-only contract. Because OpenSpec dependency edges are artifact-availability relationships rather than actor-authenticated approvals, stronger organizational enforcement requires an external CI/hook/review mechanism. The schema does not pretend otherwise.
+
+See the integration README for installation and lifecycle details.
 
 ## Evaluation
 
@@ -137,6 +147,7 @@ design-before-code/
 │   └── design-readiness-review/
 ├── integrations/
 │   └── openspec/
+│       └── design-before-code/
 ├── examples/
 ├── evals/
 ├── ATTRIBUTION.md
@@ -155,6 +166,6 @@ The readiness reviewer is a **gate and router**, not a universal fourth designer
 
 ## Status
 
-Early experimental project — **4 of 4 core Skills have a synthesized minimum usable version**.
+Early experimental project — **4 of 4 core Skills have synthesized minimum usable versions, and the first OpenSpec orchestration bundle exists**.
 
-Current priority: validate the multi-Skill chain with compact cross-artifact evals, then build OpenSpec orchestration so implementation stays blocked until readiness review and explicit human approval are complete.
+Current priority: validate the custom schema with a real OpenSpec CLI, then run one controlled end-to-end greenfield change through Business → UX → Data → Readiness → human approval → specs/design/tasks.
