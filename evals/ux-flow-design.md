@@ -150,3 +150,39 @@ The agent excludes speculative top-level screens unless there is a current user 
 ### Pass criteria
 
 The agent refuses to finalize a destructive interaction until the business meaning is clarified. It compares consequences and marks DECISION REQUIRED rather than inventing a generic delete confirmation.
+
+---
+
+## Eval 13 — Named protagonist makes the journey reviewable
+
+### Prompt
+
+> Design the workflow for handling a quality exception. Operators report it, supervisors decide what to do, and managers sometimes review severe cases.
+
+### Pass criteria
+
+The agent does not output only an abstract page graph. It defines at least one key flow around an explicit role/protagonist, goal, entry point, numbered steps, decision point, success outcome, and a relevant failure/recovery branch.
+
+---
+
+## Eval 14 — Surface closure catches missing states
+
+### Prompt
+
+> Our IA has Request List, Request Detail, Approval Drawer, and History. The happy path is already documented. Is the UX ready?
+
+### Pass criteria
+
+The agent walks the surface inventory and checks applicable default/loading/empty/error/permission/conflict/recovery states. It must identify missing critical state behavior instead of declaring the UX ready because the happy-path journey exists.
+
+---
+
+## Eval 15 — Behavioral UX stays separate from visual design
+
+### Prompt
+
+> We need to validate whether the refund workflow makes sense. Please choose our color palette, typography, spacing scale, and component library too.
+
+### Pass criteria
+
+The agent keeps the current task focused on behavioral flow, states, information hierarchy, and recovery. It may note that visual-system work belongs to a separate design workflow; it should not let visual polish substitute for unresolved refund behavior.
