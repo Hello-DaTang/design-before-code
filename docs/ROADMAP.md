@@ -70,7 +70,7 @@ Synthesizes readiness/cohesion review, staged gates, and explicit human approval
 
 ### Phase C — OpenSpec orchestration
 
-**Schema implementation exists; runtime validation is next.**
+**Schema CLI validation complete; runtime agent validation is next.**
 
 Current bundle:
 
@@ -106,6 +106,14 @@ tasks
 apply
 ```
 
+Validated locally with OpenSpec 1.8.0 on 2026-09-10:
+
+- project schema discovery succeeded;
+- `openspec schema validate design-before-code --verbose` passed YAML, structure, template, and dependency-graph checks;
+- `openspec schema which design-before-code` resolved the project-local bundle;
+- `openspec new change dbc-smoke --schema design-before-code` succeeded;
+- `openspec status --change dbc-smoke` showed 9 artifacts and the expected blocked dependency graph.
+
 Design choices:
 
 - keep each core Skill independently usable;
@@ -116,18 +124,19 @@ Design choices:
 - acknowledge that OpenSpec `requires` edges are artifact-availability relationships, not actor-authenticated business gates;
 - leave identity-level enforcement to optional external CI/hook/review integration.
 
-Next validation steps:
+Next runtime validation steps:
 
-1. copy the bundle into a real initialized OpenSpec project;
-2. run `openspec schema validate design-before-code`;
-3. inspect `openspec status --json` and artifact instructions;
-4. verify the workflow stops at `human-approval` rather than self-approving;
-5. verify specs/tasks/apply refuse PENDING or missing approval;
-6. fix only observed integration failures.
+1. install/use the schema in an agent-enabled OpenSpec project that can access the four Design Before Code Skills;
+2. create one small test change;
+3. verify `proposal → business-model → ux-flow → data-model → design-readiness` invokes the intended Skills rather than reproducing their logic from schema prompts;
+4. verify the agent stops at `human-approval` and does not create or edit that artifact itself;
+5. verify PENDING/missing approval prevents specs/tasks/apply at the instruction level;
+6. after manual `APPROVAL: APPROVED`, verify specs → technical-design → tasks unlock and proceed;
+7. fix only observed integration failures.
 
 ### Phase D — End-to-end milestone validation
 
-After the schema passes CLI smoke tests, run one realistic greenfield requirement through:
+After runtime orchestration passes, run one realistic greenfield requirement through:
 
 ```text
 requirements
@@ -201,4 +210,4 @@ The first meaningful milestone is reached when a user can provide rough meeting 
 6. orchestration that preserves those gates before tasks/apply;
 7. one end-to-end real-project validation.
 
-Items 1–5 exist at an experimental synthesized level. Item 6 now has a schema implementation awaiting real OpenSpec CLI validation. Item 7 follows after that validation passes.
+Items 1–5 exist at an experimental synthesized level. OpenSpec schema discovery/validation and dependency-graph checks for item 6 have passed; runtime Skill invocation and approval-stop behavior are the remaining Phase C checks. Item 7 follows after those pass.
