@@ -31,50 +31,38 @@ Design Before Code moves those decisions earlier and turns them into artifacts a
 
 Turns rough requirements and meeting notes into a reviewable business model before UX, data, API, or code design.
 
+It focuses on actors/goals, terminology, business concepts, lifecycles, states/events, rules, scenarios, decision provenance, and downstream constraints. It deliberately avoids ritual DDD and does not generate tables/pages/code.
+
+### `ux-flow-design` v0.1
+
+[`skills/ux-flow-design/SKILL.md`](skills/ux-flow-design/SKILL.md)
+
+Turns an understood business model into reviewable user task flows before Vue/React/Figma implementation.
+
 It focuses on:
 
-- actors and goals;
-- terminology;
-- business concepts and responsibilities;
-- lifecycles, states, and events;
-- rules and invariants;
-- normal and exceptional scenarios;
-- FACT / INFERENCE / RECOMMENDATION / ASSUMPTION / DECISION REQUIRED;
-- downstream constraints that UX and data design must respect.
+- actor jobs and task priority;
+- information architecture driven by user goals rather than backend entities;
+- primary journeys and decision points;
+- page/surface responsibilities;
+- page vs dialog/drawer choices;
+- empty/loading/error/permission/conflict/recovery states;
+- historical/backdated entry behavior;
+- low-fidelity wireframes;
+- downstream API/data implications created by UX promises;
+- human review gate before frontend implementation.
 
-It deliberately avoids ritual DDD and does not generate tables/pages/code.
+It deliberately avoids visual-branding/design-system work and does not generate frontend code.
 
 ### `data-model-design` v0.2.1
 
 [`skills/data-model-design/SKILL.md`](skills/data-model-design/SKILL.md)
 
-Designs and reviews a data model through:
-
-1. decision provenance;
-2. conceptual model;
-3. logical model;
-4. physical model candidates;
-5. temporal review;
-6. scenario simulation;
-7. design review;
-8. human review gate.
+Designs and reviews a data model through decision provenance, conceptual/logical/physical candidates, temporal review, scenario simulation, design review, and a human gate.
 
 Current strengths include transitive redundancy review, declarative-integrity reasoning, business-effective vs recording time, historical relationship vs value snapshot semantics, mutable-fact policy, canonical units, and physical-model decision locks.
 
-## Planned skills
-
-### `ux-flow-design`
-
-Task-first UX design before Vue/React/Figma implementation:
-
-- user goals;
-- task/journey flow;
-- information architecture;
-- primary actions;
-- normal + failure/recovery paths;
-- empty/loading/error/permission/conflict states;
-- low-fidelity wireframes;
-- unresolved interaction decisions.
+## Planned skill
 
 ### `design-readiness-review`
 
@@ -82,7 +70,7 @@ Cross-checks business, UX, and data artifacts and answers:
 
 > Do these three views describe the same system, and is it safe to start implementation?
 
-It will produce a READY / NEEDS DECISION / NOT READY gate.
+It will detect contradictions, run a cross-artifact scenario, surface blocked decisions, and produce a READY / NEEDS DECISION / NOT READY implementation gate.
 
 ### OpenSpec integration
 
@@ -114,7 +102,7 @@ design-readiness-review
 
 ## Evaluation
 
-We no longer rerun expensive full A/B experiments for every edit.
+We do not rerun expensive full A/B experiments for every edit.
 
 Evaluation is tiered:
 
@@ -128,6 +116,7 @@ See [`docs/EVALUATION-PROTOCOL.md`](docs/EVALUATION-PROTOCOL.md).
 Current evals:
 
 - [`evals/business-domain-design.md`](evals/business-domain-design.md)
+- [`evals/ux-flow-design.md`](evals/ux-flow-design.md)
 - [`evals/data-model-design.md`](evals/data-model-design.md)
 
 ## Repository structure
@@ -140,6 +129,9 @@ design-before-code/
 │   └── ROADMAP.md
 ├── skills/
 │   ├── business-domain-design/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   ├── ux-flow-design/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   └── data-model-design/
@@ -161,6 +153,6 @@ A failure found in one benchmark may enter a core Skill only after it is general
 
 ## Status
 
-Early experimental project.
+Early experimental project — **3 of 4 core Skills now have a minimum usable version**.
 
-Current priority: build the complete pre-implementation design triangle instead of endlessly polishing one database skill.
+Current priority: build `design-readiness-review` v0.1 and complete the first end-to-end pre-implementation design loop before investing heavily in OpenSpec orchestration or deeper single-skill tuning.
