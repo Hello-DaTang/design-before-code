@@ -77,7 +77,7 @@ The agent cannot approve implementation on the human's behalf.
 
 ## OpenSpec orchestration
 
-An experimental custom schema bundle now lives at:
+An experimental custom schema bundle lives at:
 
 [`integrations/openspec/design-before-code/`](integrations/openspec/design-before-code/)
 
@@ -109,9 +109,15 @@ The four Design Before Code skills remain independently usable. OpenSpec owns ar
 
 `human-approval.md` is a human-only contract. Because OpenSpec dependency edges are artifact-availability relationships rather than actor-authenticated approvals, stronger organizational enforcement requires an external CI/hook/review mechanism. The schema does not pretend otherwise.
 
-The bundle has passed OpenSpec 1.8.0 schema validation and a controlled Codex runtime smoke test: all four companion Skills were invoked, readiness reached `READY_FOR_HUMAN_APPROVAL`, and the agent stopped without creating `human-approval.md` or downstream artifacts.
+The bundle has passed OpenSpec 1.8.0 CLI validation and controlled Codex runtime validation, including:
 
-See the integration README for installation and lifecycle details.
+- actual delegation to all four companion Skills;
+- stop at `READY_FOR_HUMAN_APPROVAL` without agent-authored approval;
+- rejection of `APPROVAL: PENDING` even when OpenSpec structurally considers specs ready;
+- progression after human-authored `APPROVAL: APPROVED` through specs → technical-design → tasks;
+- completion of all 9 planning artifacts without running apply or writing application code.
+
+See [`integrations/openspec/design-before-code/VALIDATION.md`](integrations/openspec/design-before-code/VALIDATION.md) for recorded evidence.
 
 ## Evaluation
 
@@ -169,6 +175,6 @@ The readiness reviewer is a **gate and router**, not a universal fourth designer
 
 ## Status
 
-Early experimental project — **4 of 4 core Skills have synthesized minimum usable versions, and the first OpenSpec orchestration bundle has passed CLI and runtime smoke validation**.
+Early experimental project — **4 of 4 core Skills have synthesized minimum usable versions, and the first OpenSpec orchestration bundle has passed CLI, runtime, negative-gate, and positive-gate validation**.
 
-Current priority: run approval-gate negative/positive checks, then perform one controlled end-to-end greenfield milestone validation through Business → UX → Data → Readiness → human approval → specs/design/tasks.
+Current priority: run the first Level 3 realistic greenfield end-to-end benchmark through Business → UX → Data → Readiness → human decisions/approval → specs → technical design → tasks, without starting apply.
