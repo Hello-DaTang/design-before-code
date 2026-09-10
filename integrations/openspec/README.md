@@ -1,55 +1,62 @@
-# OpenSpec Integration Draft
+# OpenSpec Integration
 
-This directory is intentionally minimal in v0.1.
+Design Before Code uses OpenSpec as an orchestration layer, not as the product identity.
 
-The long-term goal is to use OpenSpec as orchestration and Design Before Code skills as specialized design intelligence.
+The first actual custom schema bundle is now available at:
 
-A future custom schema could enforce an artifact flow similar to:
+```text
+integrations/openspec/design-before-code/
+```
+
+It contains:
+
+```text
+design-before-code/
+├── schema.yaml
+├── README.md
+├── INTEGRATION.md
+└── templates/
+    ├── proposal.md
+    ├── business-model.md
+    ├── ux-flow.md
+    ├── data-model.md
+    ├── design-readiness.md
+    ├── human-approval.md
+    ├── spec.md
+    ├── technical-design.md
+    └── tasks.md
+```
+
+## Workflow
 
 ```text
 proposal
-   ↓
+  ↓
 business-model
-   ↓
+  ↓
 ux-flow
-   ↓
+  ↓
 data-model
-   ↓
-scenario-review
-   ↓
-technical-design
-   ↓
+  ↓
+design-readiness
+  ↓
 human-approval
-   ↓
+  ↓
+specs
+  ↓
+technical-design
+  ↓
 tasks
-   ↓
+  ↓
 apply
 ```
 
-The important rule is that implementation artifacts must depend on an explicit human-approved design state.
+The first four design artifacts delegate to the standalone Design Before Code skills. After human approval, OpenSpec resumes its native strengths: behavior specs, technical design, task tracking, apply, verify, and archive.
 
-For `data-model`, the artifact instruction should delegate to the `data-model-design` skill rather than independently generating a schema.
+## Approval boundary
 
-Example conceptual fragment:
+OpenSpec dependency edges control artifact availability; they are not actor-authenticated business gates. Therefore the schema treats `human-approval.md` as a human-only contract and repeats exact approval checks in specs, tasks, and apply instructions.
 
-```yaml
-artifacts:
-  - id: data-model
-    requires:
-      - business-model
-      - ux-flow
+This is an agent/workflow-level gate. Teams that need identity-level enforcement should add an external CI/hook/review mechanism.
 
-  - id: scenario-review
-    requires:
-      - data-model
-
-  - id: human-approval
-    requires:
-      - scenario-review
-
-  - id: tasks
-    requires:
-      - human-approval
-```
-
-This is not yet a production OpenSpec schema. It documents the intended integration boundary while v0.1 focuses on validating the standalone data-model skill first.
+See [`design-before-code/README.md`](design-before-code/README.md) for installation and [`design-before-code/INTEGRATION.md`](design-before-code/INTEGRATION.md) for lifecycle details.
