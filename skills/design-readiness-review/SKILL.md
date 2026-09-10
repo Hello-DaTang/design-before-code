@@ -2,7 +2,9 @@
 
 Cross-review business-domain, UX-flow, and data-model artifacts before implementation. The goal is not to summarize each artifact, but to determine whether they describe the same product and whether implementation can begin safely.
 
-**Current behavior target: v0.1.**
+**Current behavior target: v0.2.**
+
+This Skill synthesizes BMad-style implementation-readiness/cohesion review, Spec Kit-style phase gates/re-checks, and Superpowers-style explicit human approval before implementation.
 
 ## When to use
 
@@ -22,37 +24,44 @@ Do not use it as another architecture-design pass or as a way to silently resolv
 6. **Do not allow a core business task to exist without a coherent UX path and supporting data semantics.**
 7. **Do not allow a UX promise such as draft, undo, partial completion, historical correction, or conflict recovery without identifying the downstream support it requires.**
 8. **Do not start implementation if cross-artifact scenario simulation exposes a contradiction.**
+9. **Re-run the gate after material upstream design changes; a previous READY does not automatically survive changed semantics.**
+10. **Human approval is a hard gate: the agent cannot approve implementation on the user's behalf.**
 
 ## Required inputs
 
 Prefer these artifacts when available:
 
 - business/domain model;
-- UX/task-flow design;
+- UX/task-flow behavioral contract;
 - data-model design;
 - unresolved decision lists from each artifact;
-- original requirements/meeting notes for provenance checks when needed.
+- original requirements/meeting notes for provenance checks when needed;
+- project-level design constraints/constitution/context if the project defines one.
 
 If one of the three core artifacts is missing, the default outcome is **NOT READY** unless the missing view is demonstrably irrelevant to the scoped change.
 
 ## Required output sequence
 
-1. Artifact inventory and scope
+1. Artifact inventory, scope, and project constraints
 2. Decision ledger reconciliation
-3. Concept and terminology alignment
-4. Lifecycle/state/event consistency
-5. Task-to-capability traceability
-6. UX-to-data support review
-7. Data-to-business justification review
+3. Coverage-lens review
+4. Concept and terminology alignment
+5. Lifecycle/state/event consistency
+6. Task-to-capability traceability
+7. UX-to-data and data-to-business review
 8. Cross-artifact scenario walkthrough
-9. Contradiction and risk findings
-10. Implementation readiness gate
+9. Contradiction/risk findings and next-owner routing
+10. Implementation readiness + human approval gate
 
-## 1. Artifact inventory and scope
+## 1. Artifact inventory, scope, and project constraints
 
 State which artifacts are being reviewed, their versions/status, and the business scope they cover.
 
 Do not compare artifacts that describe different scope boundaries as if they were inconsistent. Surface scope mismatch first.
+
+If the project defines explicit constraints such as a constitution, ADRs, architecture principles, compliance requirements, tenant rules, platform limits, or the Design Before Code Project Charter, list the relevant ones and verify that later artifacts do not violate them.
+
+This is analogous to a pre/post design gate: constraints must still hold **after** design decisions have been made.
 
 ## 2. Decision ledger reconciliation
 
@@ -69,7 +78,8 @@ Then check for drift:
 - a DECISION REQUIRED in business design became a concrete UX behavior without approval;
 - a DECISION REQUIRED in UX became a concrete database field/state without approval;
 - an ASSUMPTION in one artifact appears as a FACT in another;
-- two artifacts use different answers to the same unresolved question.
+- two artifacts use different answers to the same unresolved question;
+- a recommendation has silently become a constraint.
 
 Create a compact table:
 
@@ -79,7 +89,45 @@ Create a compact table:
 
 Do not self-resolve these conflicts.
 
-## 3. Concept and terminology alignment
+## 3. Coverage-lens review
+
+Before deep semantic review, run compact coverage lenses inspired by mature planning-review workflows.
+
+### Flow coverage
+
+For every primary business goal/journey:
+
+- is there a named actor/protagonist?
+- is there a complete key flow?
+- is there a success/climax point?
+- is a failure/recovery path present where needed?
+
+### Surface/state coverage
+
+For every UX surface in the information architecture:
+
+- which key flow reaches it?
+- are applicable default/loading/empty/error/permission/conflict states specified?
+- can the user recover from consequential failures?
+
+### Concept/data coverage
+
+For every durable business concept or event required by a primary task:
+
+- is its identity/lifecycle represented by the data model when persistence is required?
+- can the system preserve the history promised by Business/UX?
+
+### Terminology inheritance
+
+Check that important terms retain the same meaning and names across artifacts unless an explicit UX-facing alias is justified.
+
+### Reference/constraint closure
+
+Check that all referenced decisions, concepts, states, or project constraints resolve to an actual definition instead of relying on “implementation will figure it out.”
+
+Coverage review catches omissions before judgment about elegance.
+
+## 4. Concept and terminology alignment
 
 Check that the same business terms mean the same thing across artifacts.
 
@@ -97,7 +145,7 @@ Examples:
 - `Delete` in UX actually means business `Void`, while data model uses technical soft delete;
 - `Current Version` means “effective today” in business but “manually selected pointer” in data.
 
-## 4. Lifecycle, state, and event consistency
+## 5. Lifecycle, state, and event consistency
 
 For every consequential concept, compare:
 
@@ -123,7 +171,7 @@ Example:
 
 This may indicate missing Payment-attempt/event history depending on requirements.
 
-## 5. Task-to-capability traceability
+## 6. Task-to-capability traceability
 
 For each primary user task, trace:
 
@@ -132,7 +180,7 @@ User task
    ↓
 Business goal/rule/lifecycle
    ↓
-UX journey/action
+UX journey/action/state
    ↓
 Required data/API capability
 ```
@@ -151,7 +199,9 @@ Examples of capability gaps:
 - business requires backdated correction but UX always defaults current master data;
 - data supports multiple versions but UX never exposes which version applies.
 
-## 6. UX-to-data support review
+## 7. UX-to-data and data-to-business review
+
+### UX → downstream support
 
 Review every consequential UX promise and ask what downstream support it requires.
 
@@ -171,7 +221,7 @@ Common promises to check:
 
 If UX behavior depends on unsupported data semantics, mark it BLOCKED instead of assuming implementation will solve it later.
 
-## 7. Data-to-business justification review
+### Data → business justification
 
 For every consequential data-model mechanism, verify its business justification.
 
@@ -212,7 +262,7 @@ The scenario must verify not only that each artifact works alone, but that all t
 
 If one step cannot be represented consistently, the design is not READY.
 
-## 9. Contradiction and risk findings
+## 9. Contradiction/risk findings and next-owner routing
 
 Group findings by severity:
 
@@ -235,41 +285,50 @@ For every BLOCKER/MAJOR finding include:
 - why implementation cannot safely guess;
 - which owner should decide or which upstream artifact should be revised.
 
-Do not solve everything inside this review skill. Route the issue back to the correct design layer.
+Route findings back to the owning layer:
 
-## 10. Implementation readiness gate
+```text
+Business semantics/lifecycle → business-domain-design
+Task flow/state/recovery     → ux-flow-design
+Persistence/history/integrity → data-model-design
+Cross-artifact conflict      → re-run design-readiness-review after fixes
+```
 
-Choose exactly one:
+The readiness skill is a gate and router, not a fourth universal designer.
 
-### READY
+## 10. Implementation readiness + human approval gate
+
+Choose exactly one machine-readable readiness result:
+
+### READY_FOR_HUMAN_APPROVAL
 
 All primary tasks trace cleanly across business, UX, and data; no material contradiction or unresolved consequential decision remains.
 
-### NEEDS DECISION
+This is **not** permission to implement yet. Present the readiness report and wait for explicit human approval.
+
+### NEEDS_DECISION
 
 The design direction is coherent, but one or more named human decisions still block safe implementation.
 
-### NOT READY
+### NOT_READY
 
-Artifacts are missing, scope is inconsistent, or contradictions require upstream redesign before a meaningful implementation plan can be created.
+Artifacts are missing, scope is inconsistent, project constraints are violated, or contradictions require upstream redesign before a meaningful implementation plan can be created.
 
-End with a concise blocking list and next-owner map, for example:
+End with a concise blocking list and next-owner map.
 
-```text
-B1 → business-domain-design: decide whether partial refund is allowed.
-B2 → ux-flow-design: add recovery for concurrent edit conflict.
-B3 → data-model-design: represent draft lifecycle promised by UX.
-```
+Only after the human explicitly approves a `READY_FOR_HUMAN_APPROVAL` design may the workflow proceed into tasks/planning/implementation.
 
-A human must explicitly approve the resolved design before implementation begins.
+If any material artifact changes afterward, invalidate the prior readiness result and re-run this review.
 
 ## Review principles
 
 - Cross-artifact consistency is more important than the elegance of any single artifact.
+- Mechanical coverage comes before subjective judgment: missing flows/states/concepts should be found explicitly.
 - The reviewer finds contradictions; it does not become a fourth place that invents product semantics.
 - Every user-facing promise must have business meaning and technical/data support.
 - Every consequential schema rule must trace back to business meaning.
 - Decisions should have one visible provenance, not mutate silently across documents.
+- Project-level constraints must still pass after design, not only before it.
 - Scenario walkthroughs are the strongest way to expose disagreements hidden by terminology.
-- Route findings to the owning skill/layer instead of expanding this skill into a universal designer.
-- Optimize the readiness report for a normal developer/product owner to make a go/no-go decision.
+- Readiness is invalidated by material upstream changes and must be re-checked.
+- Human approval, not agent confidence, is the final pre-implementation gate.
