@@ -2,87 +2,152 @@
 
 > Before AI writes code, make business, UX, and data-model decisions reviewable by humans.
 
-Design Before Code is a collection of Agent Skills for making important product and data-design decisions explicit **before implementation starts**.
+Design Before Code is a collection of Agent Skills for making consequential product and design decisions explicit **before implementation starts**.
 
-The project is **greenfield-first**. It is designed for 0→1 application development where requirements may exist as meeting notes, domain explanations, rough workflows, or product ideas, but the database and UX should not silently emerge during coding.
+The project is **greenfield-first**. It is designed for 0→1 application development where requirements may exist as meeting notes, domain explanations, rough workflows, or product ideas, but the business model, page flow, and database should not silently emerge during coding.
 
-It can also be used for **early MVP review**, where a small amount of code already exists and the goal is to compare the current design with an intended target design. It is not currently intended to be a full legacy-code reverse-engineering or large-scale brownfield refactoring framework.
+It can also support **early MVP review** while the implementation is still cheap to reshape. It is not currently intended to be a full legacy-code reverse-engineering or large-scale brownfield refactoring framework.
 
-The project's long-term mission and anti-drift rules are defined in [`docs/PROJECT-CHARTER.md`](docs/PROJECT-CHARTER.md). Major skill or roadmap changes should be checked against that charter rather than emerging implicitly from repeated benchmark tuning.
+The project's long-term mission and anti-drift rules live in [`docs/PROJECT-CHARTER.md`](docs/PROJECT-CHARTER.md). The development sequence lives in [`docs/ROADMAP.md`](docs/ROADMAP.md), and evaluation cost/discipline is defined in [`docs/EVALUATION-PROTOCOL.md`](docs/EVALUATION-PROTOCOL.md).
 
 ## Why
 
-AI coding agents are very good at implementation, but they can also make important design decisions implicitly while coding:
+AI coding agents can make good implementation progress while silently deciding:
 
-- creating tables as implementation needs appear;
-- introducing redundant fields without an explicit historical-data strategy;
-- shaping user flows around code structure instead of user intent;
-- adding architecture or schema complexity that the human reviewer never approved;
-- treating reasonable recommendations as if they were confirmed requirements;
-- using current master data to reconstruct historical events that happened earlier;
-- finalizing physical schema choices while the business decision is still unresolved;
-- discovering product decisions only after the MVP already exists.
+- what the real business concepts are;
+- whether two concepts with different lifecycles should be merged;
+- what the user must click and in what order;
+- what becomes a table or redundant field;
+- how history behaves after prices, versions, departments, standards, or policies change;
+- which recommendations are treated as if stakeholders already approved them.
 
-This project moves those decisions earlier and turns them into reviewable artifacts.
+Design Before Code moves those decisions earlier and turns them into artifacts a normal application developer or product owner can understand, challenge, and approve.
 
-## Current scope — data-model-design v0.2.1
+## Current skills
 
-The first implemented skill is:
+### `business-domain-design` v0.1
 
-- [`data-model-design`](skills/data-model-design/SKILL.md) — design and review a data model through conceptual, logical, physical, temporal, scenario-validation, and human-gate stages before implementation.
+[`skills/business-domain-design/SKILL.md`](skills/business-domain-design/SKILL.md)
 
-v0.2 introduced:
+Turns rough requirements and meeting notes into a reviewable business model before UX, data, API, or code design.
 
-- decision provenance: FACT / INFERENCE / RECOMMENDATION / ASSUMPTION / DECISION REQUIRED;
-- transitive and derived redundancy review, not only duplicate-column review;
-- business-effective time vs system recording time;
-- historical relationship references vs full value snapshots;
-- adversarial late-entry/backdated scenario simulation;
-- physical-model decision locks when material business semantics are unresolved.
+It focuses on:
 
-v0.2.1 refines that behavior by adding:
+- actors and goals;
+- terminology;
+- business concepts and responsibilities;
+- lifecycles, states, and events;
+- rules and invariants;
+- normal and exceptional scenarios;
+- FACT / INFERENCE / RECOMMENDATION / ASSUMPTION / DECISION REQUIRED;
+- downstream constraints that UX and data design must respect.
 
-- declarative-integrity review before claiming intentional redundancy cannot be database-enforced (for example composite FK + composite UNIQUE patterns where supported);
-- explicit distinction between prospective business change, retroactive correction, original-applied preservation, and intentional latest-value reinterpretation;
-- valid/effective time vs recording/transaction-time reasoning when both questions matter;
-- canonical unit review: input/display units are not automatically the approved storage/computation unit.
+It deliberately avoids ritual DDD and does not generate tables/pages/code.
 
-Planned skills:
+### `data-model-design` v0.2.1
 
-- `business-domain-design`
-- `ux-flow-design`
-- `design-readiness-review`
-- OpenSpec workflow integration
+[`skills/data-model-design/SKILL.md`](skills/data-model-design/SKILL.md)
 
-## Core principle
+Designs and reviews a data model through:
 
-**Do not jump from requirements directly to SQL.**
+1. decision provenance;
+2. conceptual model;
+3. logical model;
+4. physical model candidates;
+5. temporal review;
+6. scenario simulation;
+7. design review;
+8. human review gate.
 
-A data model should become understandable in this order:
+Current strengths include transitive redundancy review, declarative-integrity reasoning, business-effective vs recording time, historical relationship vs value snapshot semantics, mutable-fact policy, canonical units, and physical-model decision locks.
 
-1. Context and decision provenance — what is fact, inference, recommendation, assumption, or a human decision?
-2. Conceptual model — what exists in the real world?
-3. Logical model — what identities, relationships, rules, and lifecycles exist?
-4. Physical model candidates — how could the approved semantics be represented in the target database?
-5. Temporal review — what changes, why does it change, what must history mean, and at what business-effective/system time?
-6. Scenario simulation — does the model survive realistic mutations, late entry, correction, and policy changes?
-7. Design review — are redundancy, integrity, lifecycle, units, and unresolved decisions visible?
-8. Human review gate — unresolved consequential choices remain blocked before coding.
+## Planned skills
+
+### `ux-flow-design`
+
+Task-first UX design before Vue/React/Figma implementation:
+
+- user goals;
+- task/journey flow;
+- information architecture;
+- primary actions;
+- normal + failure/recovery paths;
+- empty/loading/error/permission/conflict states;
+- low-fidelity wireframes;
+- unresolved interaction decisions.
+
+### `design-readiness-review`
+
+Cross-checks business, UX, and data artifacts and answers:
+
+> Do these three views describe the same system, and is it safe to start implementation?
+
+It will produce a READY / NEEDS DECISION / NOT READY gate.
+
+### OpenSpec integration
+
+OpenSpec is intended to orchestrate the artifacts later, not define the core product. Each Skill should remain independently usable in compatible agent environments.
+
+## Intended first complete workflow
+
+```text
+meeting notes / requirements
+          ↓
+business-domain-design
+          ↓
+    human review
+          ↓
+    ux-flow-design
+          ↓
+    human review
+          ↓
+   data-model-design
+          ↓
+    human review
+          ↓
+design-readiness-review
+          ↓
+   final human gate
+          ↓
+ OpenSpec / implementation
+```
+
+## Evaluation
+
+We no longer rerun expensive full A/B experiments for every edit.
+
+Evaluation is tiered:
+
+1. **Unit Eval** — one compact behavior test.
+2. **Regression Sample** — new eval + 2–4 older cases.
+3. **Domain Benchmark** — realistic cross-domain requirement at milestones.
+4. **A/B Benchmark** — rare; used for first baselines, major rewrites, or major release evidence.
+
+See [`docs/EVALUATION-PROTOCOL.md`](docs/EVALUATION-PROTOCOL.md).
+
+Current evals:
+
+- [`evals/business-domain-design.md`](evals/business-domain-design.md)
+- [`evals/data-model-design.md`](evals/data-model-design.md)
 
 ## Repository structure
 
 ```text
 design-before-code/
 ├── docs/
-│   └── PROJECT-CHARTER.md
+│   ├── PROJECT-CHARTER.md
+│   ├── EVALUATION-PROTOCOL.md
+│   └── ROADMAP.md
 ├── skills/
+│   ├── business-domain-design/
+│   │   ├── SKILL.md
+│   │   └── references/
 │   └── data-model-design/
 │       ├── SKILL.md
 │       └── references/
 ├── integrations/
 │   └── openspec/
 ├── examples/
-│   └── manufacturing/
 ├── evals/
 ├── ATTRIBUTION.md
 ├── CHANGELOG.md
@@ -90,46 +155,12 @@ design-before-code/
 └── README.md
 ```
 
-## Intended workflow
+## Project rule
 
-```text
-meeting notes / requirements
-          ↓
-   business understanding
-          ↓
-      UX flow design
-          ↓
-     data model design
-          ↓
-   scenario simulation
-          ↓
-      human review
-          ↓
-        coding
-```
-
-Design Before Code does not try to replace OpenSpec, Spec Kit, BMAD, or other specification systems. The intended long-term direction is to provide reusable design intelligence that can be called independently or orchestrated by tools such as OpenSpec.
-
-## Evaluation philosophy
-
-The project does not evaluate a skill by checking whether it produces one canonical schema.
-
-Instead, evaluations ask whether the agent:
-
-- exposes consequential ambiguity before implementation;
-- distinguishes requirements from its own recommendations;
-- detects redundant and contradictory representations;
-- explores enforceable integrity rather than making vague database-capability claims;
-- preserves or intentionally reinterprets historical business meaning according to explicit policy;
-- avoids premature physical decisions;
-- produces artifacts a normal application developer can challenge and approve.
-
-Cross-domain evaluation is required to prevent benchmark overfitting. A failure found in one domain should become a generalized rule only when it transfers beyond that single case.
-
-See [`evals/data-model-design.md`](evals/data-model-design.md) for the current regression suite and [`docs/PROJECT-CHARTER.md`](docs/PROJECT-CHARTER.md) for the anti-drift rules.
+A failure found in one benchmark may enter a core Skill only after it is generalized beyond that specific domain. We optimize for reusable reasoning, not benchmark-specific answers.
 
 ## Status
 
-Early experimental **data-model-design v0.2.1**.
+Early experimental project.
 
-The current goal is to stabilize data-model reasoning across substantially different domains before expanding into business-domain and UX skills.
+Current priority: build the complete pre-implementation design triangle instead of endlessly polishing one database skill.
