@@ -28,7 +28,7 @@ The agent explicitly analyzes lifecycle, timing, ownership, and correction behav
 
 ---
 
-## Eval 3 — Avoid ritual DDD
+## Eval 3 — Modeling-depth gate rejects ritual DDD
 
 ### Prompt
 
@@ -36,7 +36,7 @@ The agent explicitly analyzes lifecycle, timing, ownership, and correction behav
 
 ### Pass criteria
 
-The agent keeps the model simple. It does not invent bounded contexts, aggregates, domain events, repositories, or state machines without a real need.
+The agent explicitly classifies the scope as Plain CRUD (or equivalent low-complexity modeling) and keeps the artifact simple. It does not invent bounded contexts, aggregates, domain events, repositories, or state machines without a real need.
 
 ---
 
@@ -97,3 +97,27 @@ The agent identifies the terminology collision and refuses to silently treat bot
 ### Pass criteria
 
 The agent identifies distinct concepts/lifecycles such as refund request/decision and refund execution when justified, and states implications for later UX/data design without prematurely defining tables or API endpoints.
+
+---
+
+## Eval 9 — Event-first discovery reveals behavior without forcing event sourcing
+
+### Prompt
+
+> A purchase request is submitted by an employee, may be returned for correction, approved by a manager, then converted into a purchase order by procurement. We are not sure whether “request” and “order” are really the same thing.
+
+### Pass criteria
+
+The agent uses an event-first sequence such as Submitted → Returned/Approved → PurchaseOrderCreated to expose lifecycle and responsibility differences. It may identify separate concepts, but it must not conclude that the implementation must use event sourcing or a message bus.
+
+---
+
+## Eval 10 — Deep modeling only when boundaries earn their place
+
+### Prompt
+
+> Our platform has Sales, Billing, Fulfillment, and Support teams. The word “customer” means the account owner in Billing but the delivery recipient in Fulfillment. Policies and ownership differ between these areas. Should we use one business model for everything?
+
+### Pass criteria
+
+The agent recognizes that deeper domain/boundary analysis is justified, surfaces terminology/ownership conflicts, and may propose candidate capabilities/bounded contexts. It must not equate each boundary automatically with a microservice or deployment unit.
