@@ -1,8 +1,13 @@
+---
+name: business-domain-design
+description: Turn rough requirements and meeting notes into a reviewable business model before UX, data, API, or implementation design.
+---
+
 # business-domain-design
 
 Turn rough requirements, meeting notes, stakeholder explanations, and partial product understanding into a reviewable business model before UX, database, API, or implementation design.
 
-**Current behavior target: v0.2.**
+**Current behavior target: v0.2.1.**
 
 This Skill synthesizes collaborative design-gating ideas from Superpowers, complexity-sensitive planning from BMad, and selected discovery techniques from Domain-Driven Design. It uses those techniques only when they clarify the business problem; it does not force DDD ceremony.
 
@@ -23,7 +28,9 @@ Do not use it as a full DDD transformation, architecture generator, bounded-cont
 5. **Do not collapse concepts with materially different lifecycles just because they appear on the same screen.**
 6. **Do not split one simple concept into multiple entities merely to look architecturally sophisticated.**
 7. **Do not resolve consequential product/business ambiguity without making the choice visible to the human reviewer.**
-8. **Do not hand off to UX, data, planning, or implementation until the business model has been presented for human review.**
+8. **Do not leave a prerequisite business fact source implicit when later eligibility or lifecycle depends on knowing that fact.** If the system must know that something happened, became effective, was completed, or was verified, identify who/what establishes that fact and when. If the source does not say and different answers change downstream behavior, mark it **DECISION REQUIRED**.
+9. **Do not infer a business calculation formula merely because its parameters are named.** When caps, percentages, rates, thresholds, priorities, or other parameters can be combined in materially different ways, make the composition/order/rounding semantics explicit or mark them **DECISION REQUIRED**.
+10. **Do not hand off to UX, data, planning, or implementation until the business model has been presented for human review.**
 
 ## Required output sequence
 
@@ -204,6 +211,16 @@ For every consequential concept ask:
 - when is it considered complete/final?
 - can later events change how older events should be interpreted?
 
+For every transition whose eligibility depends on a real-world prerequisite, also ask:
+
+- what exact business fact proves the prerequisite is true?
+- who or what establishes that fact?
+- at what business-effective time does it become true?
+- does the system observe it directly, receive an external signal, infer it from another date/state, or rely on a user attestation?
+- would different answers change who can act, when an action appears, or what must be stored?
+
+If the requirement says only “after X happened” but the system has no defined way to know X happened, do not invent a source of truth. Mark the missing rule as **DECISION REQUIRED** when it blocks downstream behavior.
+
 Separate **state** from **event**.
 
 Example:
@@ -212,6 +229,8 @@ Example:
 - `PaymentSucceeded` is an event that may cause that result.
 
 Extract business rules separately from implementation mechanisms. Classify each important rule as explicitly required, inferred, recommended, or unresolved.
+
+For business calculations, explicitly identify the meaning of each input and how the inputs combine. A named percentage plus a maximum, for example, does not by itself establish whether the cap applies before or after the percentage. Likewise, rates/thresholds do not automatically establish rounding, precedence, accumulation, or exception semantics. If alternate formulas produce materially different business outcomes, keep the formula unresolved until a human/business rule selects it.
 
 Do not invent a detailed state machine when the source only supports a simple lifecycle.
 
@@ -232,7 +251,9 @@ When relevant include:
 - repeated attempt/retry;
 - conflicting actors.
 
-If the scenario requires a concept, event, or rule that the model does not contain, revise the model or mark a decision required.
+When a rule contains a calculation, choose concrete values that can distinguish plausible formulas. When a transition depends on a prerequisite fact, include a scenario that shows how and when that fact becomes known to the system.
+
+If the scenario requires a concept, event, rule, prerequisite source, or calculation semantics that the model does not contain, revise the model or mark a decision required.
 
 ## 9. Model challenges and optional boundaries
 
@@ -247,7 +268,9 @@ Before declaring the business model ready, explicitly challenge:
 - speculative future features driving current complexity;
 - important ownership or responsibility that is unclear;
 - missing exception/recovery behavior;
-- business events that cannot be explained by the proposed model.
+- business events that cannot be explained by the proposed model;
+- prerequisite facts whose source of truth or establishment event is undefined even though downstream eligibility depends on them;
+- multi-parameter policies whose calculation order/formula can change the business result but was never explicitly defined.
 
 ### Optional capability / bounded-context analysis
 
