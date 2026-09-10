@@ -58,6 +58,7 @@ Intentional duplication is acceptable when its purpose is explicit, for example:
 - historical relationship reference;
 - performance-driven denormalization backed by a clear source of truth;
 - integration boundary requirement;
+- partitioning or uniqueness requirement;
 - derived/cache value that can be recomputed.
 
 Unexplained duplication is a design smell.
@@ -78,23 +79,28 @@ Ask:
 - Can they disagree?
 - Which value is authoritative?
 - Can a database constraint guarantee consistency?
-- Is the query benefit worth the additional invariant?
+- Is the query/partition/uniqueness benefit worth the additional invariant?
 
 A design review that says "all redundancy is classified" must include this dependency walk.
+
+Redundancy review is not automatic rejection. If both values are useful, first look for a declarative invariant. For example, a target database may be able to enforce `(product_version_id, product_id)` through a composite foreign key referencing a composite UNIQUE key on `product_version(id, product_id)`.
+
+Do not claim that a relational database cannot enforce an invariant until target-database mechanisms have been considered precisely.
 
 ## 6. Constraints are part of the model
 
 Important domain rules should be represented where practical using:
 
 - primary keys;
-- foreign keys;
+- foreign keys, including composite foreign keys where appropriate;
 - unique constraints;
 - not-null constraints;
-- check constraints.
+- check constraints;
+- generated/partial/exclusion constraints when the target database supports and justifies them.
 
 Do not rely exclusively on service-layer validation for invariants the database can safely enforce.
 
-When multiple stored paths describe the same fact, explicitly test whether contradictory rows are possible.
+When multiple stored paths describe the same fact, explicitly test whether contradictory rows are possible and whether declarative constraints can rule them out.
 
 ## 7. Avoid generic structures too early
 
@@ -152,6 +158,8 @@ Always ask whether a historical relationship or value should be resolved at:
 - the business-effective time; or
 - the system recording time.
 
+Also ask whether a mutation means a prospective change, a retroactive correction, preservation of the originally applied value, or intentional reinterpretation using the latest value. These policies lead to different models.
+
 Late entry and backdated correction are mandatory stress cases when ownership, department, price, rate, version, or standard can change.
 
 ## 12. Keep unresolved decisions out of the final physical model
@@ -164,18 +172,30 @@ Do not say "unit is undecided" and then quietly define `actual_work_hours DECIMA
 
 Do not say "current-version semantics are undecided" and then quietly add `current_version_id` as if approved.
 
-## 13. Design for known access patterns, not imagined scale
+## 13. Units are part of data semantics
+
+Distinguish input/display units from canonical computational/storage units.
+
+Examples:
+
+- users enter hours but calculations normalize to seconds;
+- UI shows dollars while storage/calculation uses integer cents;
+- devices send grams while reports show kilograms.
+
+If unit choice changes numeric type, precision, rounding, constraints, aggregation, or integration contracts, it is not a cosmetic UI detail. Treat the canonical representation as a design decision and make conversions explicit.
+
+## 14. Design for known access patterns, not imagined scale
 
 Indexes should map to known query predicates, joins, sorting, uniqueness, and workload characteristics.
 
 Do not create broad speculative index sets before access patterns are known.
 
-## 14. Prefer specific names
+## 15. Prefer specific names
 
 Names should communicate business meaning clearly.
 
 Prefer `product_version` over `version_data`, `production_plan` over `biz_record`, and `standard_workhour` over `config_detail` when those are the real concepts.
 
-## 15. Explain trade-offs
+## 16. Explain trade-offs
 
 When multiple valid models exist, present the important alternatives and explain what each optimizes for. Do not conceal consequential choices behind implementation detail.
