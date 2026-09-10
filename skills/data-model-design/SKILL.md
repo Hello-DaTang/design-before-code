@@ -2,7 +2,7 @@
 
 Design and review an application data model before implementation. Optimize for human reviewability first, database correctness second, and implementation convenience third.
 
-**Current behavior target: v0.2.1.**
+**Current behavior target: v0.2.2.**
 
 ## When to use
 
@@ -19,6 +19,7 @@ Do not use it as a full legacy-database reverse-engineering or migration framewo
 5. **Do not claim historical correctness without distinguishing business-effective time from system recording time.**
 6. **Do not claim a duplicated fact cannot be protected by the database until declarative integrity options in the target database have been considered.**
 7. **Do not treat input/display units as an approved canonical storage unit when calculations or precision depend on that choice.**
+8. **Do not equate a coherent data model with approval to implement.** A data-model artifact can be ready for downstream technical design while cross-artifact readiness and human approval are still pending.
 
 Before implementation, make the design visible in this sequence:
 
@@ -243,13 +244,13 @@ Call out specifically:
 
 End with a compact decision section:
 
-- **Ready to implement** — only if no material ambiguity remains.
+- **Ready for downstream technical design** — the data model is coherent enough to feed later technical design/review. This is **not** human approval and **not** permission to begin implementation when a broader workflow still requires cross-artifact readiness or explicit approval.
 - **Needs human decision** — list each unresolved choice and its consequences.
 - **Not ready** — explain what information is missing.
 
 For each unresolved item, also name the physical model elements that remain blocked by it.
 
-Do not self-approve unresolved product or business decisions.
+Never treat this skill's own readiness result as approval on the user's behalf. In an orchestrated workflow, preserve any later `design-readiness` and human-approval gates.
 
 ## Design principles
 
