@@ -8,7 +8,7 @@ The project is **greenfield-first**. It is designed for 0→1 application develo
 
 It can also support **early MVP review** while the implementation is still cheap to reshape. It is not currently intended to be a full legacy-code reverse-engineering or large-scale brownfield refactoring framework.
 
-The project's long-term mission and anti-drift rules live in [`docs/PROJECT-CHARTER.md`](docs/PROJECT-CHARTER.md). The development sequence lives in [`docs/ROADMAP.md`](docs/ROADMAP.md), and evaluation cost/discipline is defined in [`docs/EVALUATION-PROTOCOL.md`](docs/EVALUATION-PROTOCOL.md).
+The project's long-term mission and anti-drift rules live in [`docs/PROJECT-CHARTER.md`](docs/PROJECT-CHARTER.md). The development sequence lives in [`docs/ROADMAP.md`](docs/ROADMAP.md), evaluation discipline is defined in [`docs/EVALUATION-PROTOCOL.md`](docs/EVALUATION-PROTOCOL.md), and the upstream-method synthesis is documented in [`docs/METHOD-SYNTHESIS.md`](docs/METHOD-SYNTHESIS.md).
 
 ## Why
 
@@ -23,25 +23,39 @@ AI coding agents can make good implementation progress while silently deciding:
 
 Design Before Code moves those decisions earlier and turns them into artifacts a normal application developer or product owner can understand, challenge, and approve.
 
+## Method synthesis, not prompt copying
+
+Design Before Code is intentionally **not** a closed-door methodology and **not** a collage of copied prompts.
+
+Its core Skills synthesize proven mechanisms from projects such as:
+
+- Superpowers — collaborative design-before-implementation and explicit approval gates;
+- BMad Method — complexity-sensitive planning, behavioral UX artifacts, state coverage, and readiness review;
+- GitHub Spec Kit — staged artifacts, clarification/gates, explicit data-model planning, and validation scenarios;
+- DDD Agent Skill — DDD-worthiness gate, Event Storming, ubiquitous language, and optional domain-boundary discovery;
+- softaworks `database-schema-designer` — normalization, constraints, access-pattern-driven indexes, and deliberate denormalization.
+
+The detailed mechanism → adaptation map, including what is intentionally excluded, lives in [`docs/METHOD-SYNTHESIS.md`](docs/METHOD-SYNTHESIS.md). Source/license acknowledgements live in [`ATTRIBUTION.md`](ATTRIBUTION.md).
+
 ## Current core skills
 
-### `business-domain-design` v0.1
+### `business-domain-design` v0.2
 
 [`skills/business-domain-design/SKILL.md`](skills/business-domain-design/SKILL.md)
 
 Turns rough requirements and meeting notes into a reviewable business model before UX, data, API, or code design.
 
-It focuses on actors/goals, terminology, business concepts, lifecycles, states/events, rules, scenarios, decision provenance, and downstream constraints. It deliberately avoids ritual DDD and does not generate tables/pages/code.
+It now includes a **Plain CRUD / Light Domain Modeling / Deep Domain Discovery** gate, optional Event Storming-lite, ubiquitous-language clarification, lifecycle/event/rule modeling, and explicit downstream constraints without forcing tactical DDD.
 
-### `ux-flow-design` v0.1
+### `ux-flow-design` v0.2
 
 [`skills/ux-flow-design/SKILL.md`](skills/ux-flow-design/SKILL.md)
 
-Turns an understood business model into reviewable user task flows before Vue/React/Figma implementation.
+Turns an understood business model into a behavioral UX contract before Vue/React/Figma implementation.
 
-It focuses on actor jobs, task-first information architecture, primary journeys, page/surface responsibilities, exception/recovery states, backdated/historical entry behavior, low-fidelity wireframes, and downstream API/data implications created by UX promises.
+It focuses on named-protagonist journeys, task-first information architecture, surface responsibilities, state/recovery coverage, low-fidelity wireframes, accessibility floor, surface closure, and downstream API/data implications created by UX promises.
 
-It deliberately avoids visual-branding/design-system work and does not generate frontend code.
+It deliberately separates **how it works** from visual-brand/design-system work.
 
 ### `data-model-design` v0.2.1
 
@@ -49,26 +63,17 @@ It deliberately avoids visual-branding/design-system work and does not generate 
 
 Designs and reviews a data model through decision provenance, conceptual/logical/physical candidates, temporal review, scenario simulation, design review, and a human gate.
 
-Current strengths include transitive redundancy review, declarative-integrity reasoning, business-effective vs recording time, historical relationship vs value snapshot semantics, mutable-fact policy, canonical units, and physical-model decision locks.
+It synthesizes explicit data-model artifact discipline with normalization/constraint/access-pattern reasoning, then adds this project's temporal-business-time, transitive-redundancy, declarative-integrity, canonical-unit, and human-decision-lock behavior.
 
-### `design-readiness-review` v0.1
+### `design-readiness-review` v0.2
 
 [`skills/design-readiness-review/SKILL.md`](skills/design-readiness-review/SKILL.md)
 
 Cross-reviews the business, UX, and data artifacts before implementation.
 
-It does not summarize them independently. It checks:
+It applies coverage lenses, decision-ledger reconciliation, lifecycle/state/event consistency, task-to-capability traceability, cross-artifact scenario walkthroughs, project-constraint re-checks, next-owner routing, and an explicit `READY_FOR_HUMAN_APPROVAL / NEEDS_DECISION / NOT_READY` gate.
 
-- decision drift across artifacts;
-- concept/terminology alignment;
-- lifecycle/state/event consistency;
-- primary task → business rule → UX journey → data/API traceability;
-- UX promises unsupported by data/lifecycle;
-- data constraints unsupported by business semantics;
-- historical behavior consistency;
-- cross-artifact scenario correctness;
-- BLOCKER / MAJOR / MINOR findings;
-- READY / NEEDS DECISION / NOT READY implementation gate.
+The agent cannot approve implementation on the human's behalf.
 
 ## First complete workflow
 
@@ -89,7 +94,7 @@ business-domain-design
           ↓
 design-readiness-review
           ↓
-   final human gate
+ explicit human approval
           ↓
  OpenSpec / implementation
 ```
@@ -122,6 +127,7 @@ Current evals:
 design-before-code/
 ├── docs/
 │   ├── PROJECT-CHARTER.md
+│   ├── METHOD-SYNTHESIS.md
 │   ├── EVALUATION-PROTOCOL.md
 │   └── ROADMAP.md
 ├── skills/
@@ -139,14 +145,16 @@ design-before-code/
 └── README.md
 ```
 
-## Project rule
+## Project rules
 
 A failure found in one benchmark may enter a core Skill only after it is generalized beyond that specific domain. We optimize for reusable reasoning, not benchmark-specific answers.
+
+Likewise, an upstream method enters a core Skill only after it is adapted to the Project Charter. We do not import ceremony merely because a respected upstream project uses it.
 
 The readiness reviewer is a **gate and router**, not a universal fourth designer. If it finds a defect, the issue should be routed back to the owning layer: business semantics, UX flow, or data model.
 
 ## Status
 
-Early experimental project — **4 of 4 core Skills now have a minimum usable version**.
+Early experimental project — **4 of 4 core Skills have a synthesized minimum usable version**.
 
-Current priority: validate the complete chain with low-cost cross-artifact evals, then build OpenSpec orchestration so implementation stays blocked until readiness review and human approval are complete.
+Current priority: validate the multi-Skill chain with compact cross-artifact evals, then build OpenSpec orchestration so implementation stays blocked until readiness review and explicit human approval are complete.
