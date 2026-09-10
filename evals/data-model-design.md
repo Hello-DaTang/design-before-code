@@ -207,7 +207,7 @@ It should show alternatives or mark affected schema elements as blocked by the d
 
 ### Pass criteria
 
-The agent must mark the storage type/unit for affected fields as unresolved or present parallel candidates, for example seconds vs decimal hours.
+The agent must distinguish input/display units from the canonical storage/computation unit and mark the latter unresolved or present parallel candidates.
 
 It must not simultaneously say "unit is undecided" and finalize a field such as `actual_work_hours DECIMAL(6,2)` as if approved.
 
@@ -245,3 +245,81 @@ The agent must separate:
 - what still requires business confirmation.
 
 Common-sense design recommendations must not be relabeled as requirements without evidence.
+
+---
+
+# v0.2.1 regression cases
+
+These cases came from reviewing the v0.2 manufacturing run. They prevent the skill from overlearning "remove redundancy" or "always preserve history" as generic rules.
+
+## Eval 15 — Explore declarative integrity before rejecting justified redundancy
+
+### Prompt
+
+> `product_version(id, product_id)` identifies a version and its product. `production_record` may need both `product_version_id` and `product_id` because product-level partitioning and a product-level uniqueness rule are required. Can the database keep the two fields consistent, or must the application do it?
+
+### Pass criteria
+
+The agent must not immediately claim the database cannot enforce the relationship.
+
+It should consider a declarative design such as:
+
+- a UNIQUE key on `product_version(id, product_id)`; and
+- a composite FK from `production_record(product_version_id, product_id)` to that key,
+
+when supported by the target database/schema.
+
+It must still explain the non-redundant alternative and the cost of storing both.
+
+### Fail examples
+
+- "Cross-row consistency can only be checked in application code" without examining composite FK/key options.
+- Removes `product_id` automatically even though a concrete partitioning/uniqueness requirement was stated.
+
+---
+
+## Eval 16 — Distinguish prospective change, retroactive correction, and latest-value reinterpretation
+
+### Prompt
+
+> A standard workhour is 20s. Sometimes a new standard of 18s becomes valid from next month. Sometimes administrators discover that 20s was entered incorrectly and should have been 19s since last month. For one report, management may also decide to recalculate all history using the latest current standard. Design the history strategy.
+
+### Pass criteria
+
+The agent must separate at least these semantics:
+
+1. prospective business change;
+2. retroactive correction;
+3. intentional latest/current-value reinterpretation;
+4. original-applied preservation if historical events must retain what was actually used.
+
+It must not recommend one generic version/effective-date table for all cases without explaining what each policy means.
+
+It should identify when valid/effective time is needed and when recording/audit history may additionally be needed to answer "what did the system believe before correction?"
+
+### Fail examples
+
+- Treats a correction as if a new value becomes valid only from today.
+- Adds effective-dated history even when the business explicitly wants all old calculations to use the latest value.
+- Assumes historical stability is always correct.
+
+---
+
+## Eval 17 — Canonical unit is a data-model decision when computation depends on it
+
+### Prompt
+
+> Operators enter actual time as 7.8 hours, while standard time is defined as 20 seconds per unit. The UI can continue showing those units, but the database and reports must compare standard and actual time reliably. What should be decided before finalizing the physical fields?
+
+### Pass criteria
+
+The agent must distinguish:
+
+- input/display units;
+- canonical storage/computation unit;
+- conversion rules;
+- numeric type, precision, and rounding implications.
+
+It should mark the canonical representation as a decision when requirements do not specify it, rather than merely copying the UI's unit into a column name/type.
+
+It may recommend a candidate such as integer seconds/milliseconds or another precise representation, but must label that as a recommendation until approved when the choice affects physical representation.
