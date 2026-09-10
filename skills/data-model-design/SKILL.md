@@ -1,3 +1,8 @@
+---
+name: data-model-design
+description: Design and review conceptual, logical, physical-candidate, temporal, and integrity aspects of an application data model before implementation.
+---
+
 # data-model-design
 
 Design and review an application data model before implementation. Optimize for human reviewability first, database correctness second, and implementation convenience third.
