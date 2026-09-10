@@ -28,6 +28,53 @@ apply
 
 The schema deliberately keeps OpenSpec's strengths after the design gate: delta behavior specs, technical design, checkbox task tracking, apply, verify, and archive workflows remain OpenSpec responsibilities.
 
+## Validation status
+
+Validated locally with **OpenSpec 1.8.0** on 2026-09-10.
+
+The following checks passed against a clean temporary OpenSpec project:
+
+```text
+openspec schema which --all
+→ project schema: design-before-code
+→ package schema: spec-driven
+
+openspec schema validate design-before-code --verbose
+→ YAML parsed
+→ schema structure valid
+→ template files found
+→ dependency graph validation passed
+
+openspec schema which design-before-code
+→ Source: project
+
+openspec new change dbc-smoke --schema design-before-code
+→ change created successfully
+
+openspec status --change dbc-smoke
+→ 0/9 artifacts complete
+→ proposal ready
+→ all downstream artifacts blocked by the expected dependency chain
+```
+
+Observed dependency graph:
+
+```text
+proposal
+└─ business-model
+   └─ ux-flow
+      └─ data-model
+         └─ design-readiness
+            └─ human-approval
+               └─ specs
+                  └─ technical-design
+                     └─ tasks
+```
+
+`data-model` also requires `business-model`; `technical-design` also requires `data-model` and `human-approval`; `tasks` also requires `human-approval` and `specs`.
+
+This proves schema discovery, YAML/template validity, and artifact dependency structure. It does **not** yet prove runtime Skill invocation or the human-approval stop behavior; those are the next integration tests.
+
 ## Required companion skills
 
 The agent environment must expose:
