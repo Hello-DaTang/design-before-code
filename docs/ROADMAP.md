@@ -6,7 +6,7 @@ Method evolution must also follow [`docs/METHOD-SYNTHESIS.md`](METHOD-SYNTHESIS.
 
 ## Current state
 
-The first four-skill loop now has synthesized minimum-usable versions:
+The first four-skill loop has synthesized minimum-usable versions:
 
 - `business-domain-design` — v0.2
 - `ux-flow-design` — v0.2
@@ -20,7 +20,7 @@ Infrastructure:
 - low-cost Evaluation Protocol
 - per-skill regression evals
 - manufacturing example
-- OpenSpec integration notes
+- OpenSpec custom schema bundle under `integrations/openspec/design-before-code/`
 
 ## Core skill set
 
@@ -61,48 +61,86 @@ Synthesizes readiness/cohesion review, staged gates, and explicit human approval
 
 ### Phase B — Cross-artifact review
 
-**Initial implementation complete.**
+**Complete at minimum-usable level.**
 
 - design-readiness-review v0.2 exists
 - compact contradiction evals exist
-- readiness result requires explicit human approval before implementation
-
-Before OpenSpec work expands, use low-cost Unit/Regression tests to check that the newly synthesized behaviors are actually followed and that no Skill became unnecessarily ceremonial.
+- synthesis smoke test passed 4/4
+- readiness result is explicitly separate from human approval
 
 ### Phase C — OpenSpec orchestration
 
-**Next major phase after compact synthesis regressions.**
+**Schema implementation exists; runtime validation is next.**
 
-Create an OpenSpec workflow/schema where artifacts depend on one another:
+Current bundle:
 
 ```text
-proposal / requirements
-        ↓
-business-model
-        ↓
-ux-flow
-        ↓
-data-model
-        ↓
-design-readiness-review
-        ↓
-explicit human approval
-        ↓
-tasks / implementation
+integrations/openspec/design-before-code/
+├── schema.yaml
+├── README.md
+├── INTEGRATION.md
+└── templates/
 ```
 
-Goals:
+Implemented flow:
+
+```text
+proposal
+  ↓
+business-model
+  ↓
+ux-flow
+  ↓
+data-model
+  ↓
+design-readiness
+  ↓
+human-approval
+  ↓
+specs
+  ↓
+technical-design
+  ↓
+tasks
+  ↓
+apply
+```
+
+Design choices:
 
 - keep each core Skill independently usable;
-- make artifact dependencies explicit;
-- prevent `tasks` / implementation from starting while readiness is NEEDS_DECISION or NOT_READY;
-- distinguish `READY_FOR_HUMAN_APPROVAL` from actual human approval;
-- prevent the agent from self-approving human decisions;
-- allow upstream artifact revisions when readiness review routes a defect back.
+- precheck companion Skill availability instead of silently falling back;
+- retain OpenSpec delta specs, technical design, task tracking, apply/verify/archive after approval;
+- treat `human-approval.md` as a human-only operational contract;
+- re-check readiness/approval in specs, tasks, and apply instructions;
+- acknowledge that OpenSpec `requires` edges are artifact-availability relationships, not actor-authenticated business gates;
+- leave identity-level enforcement to optional external CI/hook/review integration.
+
+Next validation steps:
+
+1. copy the bundle into a real initialized OpenSpec project;
+2. run `openspec schema validate design-before-code`;
+3. inspect `openspec status --json` and artifact instructions;
+4. verify the workflow stops at `human-approval` rather than self-approving;
+5. verify specs/tasks/apply refuse PENDING or missing approval;
+6. fix only observed integration failures.
 
 ### Phase D — End-to-end milestone validation
 
-After orchestration exists, run one realistic greenfield requirement through all four Skills.
+After the schema passes CLI smoke tests, run one realistic greenfield requirement through:
+
+```text
+requirements
+→ proposal
+→ business-model
+→ ux-flow
+→ data-model
+→ design-readiness
+→ human approval
+→ specs
+→ technical-design
+→ tasks
+```
 
 This is a Level 3 Domain Benchmark, not a routine development loop.
 
@@ -111,17 +149,19 @@ Measure primarily:
 - whether artifacts stay semantically aligned;
 - whether unresolved decisions remain visible;
 - whether UX promises have business/data support;
-- whether the readiness reviewer catches cross-artifact drift;
-- whether the human can understand and approve the design before coding;
+- whether readiness catches cross-artifact drift;
+- whether the human understands what is being approved;
+- whether OpenSpec preserves the approval boundary before implementation;
 - whether upstream-inspired mechanisms improve behavior without adding unnecessary ceremony.
 
-### Phase E — Broaden confidence
+### Phase E — Stronger enforcement and broader confidence
 
 Only after the first end-to-end loop is stable:
 
+- decide whether optional CI/hook approval enforcement is worth adding;
 - add milestone cross-domain benchmarks;
 - improve installation/use documentation;
-- refine Skill interoperability;
+- refine Skill interoperability and distribution;
 - periodically review mature upstream methods for transferable improvements;
 - consider early-MVP review mode;
 - consider a separate brownfield/reverse-engineering project or skill family if justified.
@@ -130,12 +170,11 @@ Only after the first end-to-end loop is stable:
 
 Until Phase C/D reveals a general issue:
 
-- `business-domain-design v0.2.x`: test the modeling-depth gate, event-first discovery, and anti-DDD-overkill behavior.
-- `ux-flow-design v0.2.x`: test named journeys, surface/state closure, and behavior-before-visual discipline.
+- `business-domain-design v0.2.x`: compact correctness fixes only.
+- `ux-flow-design v0.2.x`: compact correctness fixes only.
 - `data-model-design v0.2.x`: correctness and domain-general regression fixes only.
-- `design-readiness-review v0.2.x`: test coverage lenses, re-gating, human-approval separation, and defect routing.
-
-Do not substantially expand one Skill merely because it failed a single domain-specific benchmark or because an upstream method contains a sophisticated artifact we do not need.
+- `design-readiness-review v0.2.x`: cross-artifact correctness and routing fixes only.
+- OpenSpec schema: fix only verified orchestration, compatibility, or gate failures; do not duplicate Skill logic into schema instructions.
 
 ## What we should not do next
 
@@ -147,7 +186,8 @@ Do not substantially expand one Skill merely because it failed a single domain-s
 - Build a full legacy/brownfield reverse-engineering framework.
 - Require repeated no-skill A/B tests for routine edits.
 - Let `design-readiness-review` silently fix product decisions rather than route them upstream.
-- Let OpenSpec become the product identity; it is the orchestration layer.
+- Let OpenSpec become the product identity; it remains the orchestration layer.
+- Claim schema dependencies alone provide authenticated human approval.
 
 ## Definition of the first meaningful milestone
 
@@ -158,6 +198,7 @@ The first meaningful milestone is reached when a user can provide rough meeting 
 3. a data model they can review;
 4. a cross-artifact readiness report;
 5. an explicit human approval gate;
-6. orchestration that prevents implementation from starting before those gates are satisfied.
+6. orchestration that preserves those gates before tasks/apply;
+7. one end-to-end real-project validation.
 
-The four design Skills now cover items 1–5 at an experimental/synthesized minimum-usable level. The next milestone work is compact regression of the synthesis changes, then item 6: orchestration and one end-to-end validation.
+Items 1–5 exist at an experimental synthesized level. Item 6 now has a schema implementation awaiting real OpenSpec CLI validation. Item 7 follows after that validation passes.
