@@ -10,7 +10,7 @@ The first four-skill loop has synthesized minimum-usable versions:
 
 - `business-domain-design` — v0.2
 - `ux-flow-design` — v0.2
-- `data-model-design` — v0.2.1
+- `data-model-design` — v0.2.2
 - `design-readiness-review` — v0.2
 
 Infrastructure:
@@ -21,6 +21,7 @@ Infrastructure:
 - per-skill regression evals
 - manufacturing example
 - OpenSpec custom schema bundle under `integrations/openspec/design-before-code/`
+- recorded OpenSpec validation evidence in `integrations/openspec/design-before-code/VALIDATION.md`
 
 ## Core skill set
 
@@ -40,7 +41,7 @@ Focuses on the behavioral experience contract: named-protagonist journeys, task-
 
 Answers: **What data exists, why does it exist, and will history still mean the right thing later?**
 
-Synthesizes explicit data-model artifacts with normalization, constraints, access-pattern-driven physical design, temporal semantics, scenario validation, and human decision locks.
+Synthesizes explicit data-model artifacts with normalization, constraints, access-pattern-driven physical design, temporal semantics, scenario validation, and human decision locks. Its positive gate means ready for downstream technical design, not implementation approval.
 
 ### 4. `design-readiness-review`
 
@@ -56,7 +57,7 @@ Synthesizes readiness/cohesion review, staged gates, and explicit human approval
 
 - business-domain-design v0.2
 - ux-flow-design v0.2
-- data-model-design v0.2.1
+- data-model-design v0.2.2
 - upstream method synthesis documented
 
 ### Phase B — Cross-artifact review
@@ -70,7 +71,7 @@ Synthesizes readiness/cohesion review, staged gates, and explicit human approval
 
 ### Phase C — OpenSpec orchestration
 
-**Schema CLI validation complete; runtime agent validation is next.**
+**Complete at the current experimental level.**
 
 Current bundle:
 
@@ -79,6 +80,7 @@ integrations/openspec/design-before-code/
 ├── schema.yaml
 ├── README.md
 ├── INTEGRATION.md
+├── VALIDATION.md
 └── templates/
 ```
 
@@ -112,9 +114,13 @@ Validated locally with OpenSpec 1.8.0 on 2026-09-10:
 - `openspec schema validate design-before-code --verbose` passed YAML, structure, template, and dependency-graph checks;
 - `openspec schema which design-before-code` resolved the project-local bundle;
 - `openspec new change dbc-smoke --schema design-before-code` succeeded;
-- `openspec status --change dbc-smoke` showed 9 artifacts and the expected blocked dependency graph.
+- runtime execution delegated to all four Design Before Code Skills;
+- the agent stopped at `human-approval` without creating or modifying the approval artifact;
+- `APPROVAL: PENDING` kept the semantic gate closed even after OpenSpec structurally unlocked specs;
+- human-authored `APPROVAL: APPROVED` unlocked specs → technical-design → tasks;
+- final planning status reached 9/9 artifacts complete without running apply or writing application code.
 
-Design choices:
+Design choices retained:
 
 - keep each core Skill independently usable;
 - precheck companion Skill availability instead of silently falling back;
@@ -124,19 +130,13 @@ Design choices:
 - acknowledge that OpenSpec `requires` edges are artifact-availability relationships, not actor-authenticated business gates;
 - leave identity-level enforcement to optional external CI/hook/review integration.
 
-Next runtime validation steps:
-
-1. install/use the schema in an agent-enabled OpenSpec project that can access the four Design Before Code Skills;
-2. create one small test change;
-3. verify `proposal → business-model → ux-flow → data-model → design-readiness` invokes the intended Skills rather than reproducing their logic from schema prompts;
-4. verify the agent stops at `human-approval` and does not create or edit that artifact itself;
-5. verify PENDING/missing approval prevents specs/tasks/apply at the instruction level;
-6. after manual `APPROVAL: APPROVED`, verify specs → technical-design → tasks unlock and proceed;
-7. fix only observed integration failures.
+Phase C should now remain stable unless a later realistic benchmark reveals a general orchestration or gate defect.
 
 ### Phase D — End-to-end milestone validation
 
-After runtime orchestration passes, run one realistic greenfield requirement through:
+**Current phase.**
+
+Run one realistic, moderately complex greenfield requirement through:
 
 ```text
 requirements
@@ -145,7 +145,7 @@ requirements
 → ux-flow
 → data-model
 → design-readiness
-→ human approval
+→ human decisions / approval
 → specs
 → technical-design
 → tasks
@@ -153,15 +153,22 @@ requirements
 
 This is a Level 3 Domain Benchmark, not a routine development loop.
 
+The benchmark should be meaningfully harder than Product Category CRUD and should contain enough lifecycle, exception, permission, and mutable-policy behavior to exercise the chain without becoming a giant architecture exercise.
+
 Measure primarily:
 
-- whether artifacts stay semantically aligned;
-- whether unresolved decisions remain visible;
-- whether UX promises have business/data support;
-- whether readiness catches cross-artifact drift;
-- whether the human understands what is being approved;
-- whether OpenSpec preserves the approval boundary before implementation;
+- whether modeling depth is proportional to the real domain complexity;
+- whether materially different lifecycles are discovered rather than collapsed into one record/status;
+- whether unresolved decisions remain visible and actually interrupt downstream design when necessary;
+- whether UX journeys, states, and recovery behaviors stay aligned with business rules;
+- whether data identity, integrity, and temporal semantics support those UX promises;
+- whether readiness routes contradictions to the correct owning Skill rather than silently fixing them;
+- whether a human can understand exactly what is being approved;
+- whether approved semantics remain stable through OpenSpec specs, technical design, and tasks;
+- whether planning remains distinct from apply / coding;
 - whether upstream-inspired mechanisms improve behavior without adding unnecessary ceremony.
+
+Do not grade the benchmark by requiring one canonical schema or one preferred UI. Grade decision transparency, semantic coherence, appropriate complexity, and correct gate behavior.
 
 ### Phase E — Stronger enforcement and broader confidence
 
@@ -177,7 +184,7 @@ Only after the first end-to-end loop is stable:
 
 ## Near-term maintenance policy
 
-Until Phase C/D reveals a general issue:
+Until Phase D reveals a general issue:
 
 - `business-domain-design v0.2.x`: compact correctness fixes only.
 - `ux-flow-design v0.2.x`: compact correctness fixes only.
@@ -197,6 +204,7 @@ Until Phase C/D reveals a general issue:
 - Let `design-readiness-review` silently fix product decisions rather than route them upstream.
 - Let OpenSpec become the product identity; it remains the orchestration layer.
 - Claim schema dependencies alone provide authenticated human approval.
+- Re-run the Product Category smoke case as a benchmark; it has already served its orchestration purpose.
 
 ## Definition of the first meaningful milestone
 
@@ -208,6 +216,6 @@ The first meaningful milestone is reached when a user can provide rough meeting 
 4. a cross-artifact readiness report;
 5. an explicit human approval gate;
 6. orchestration that preserves those gates before tasks/apply;
-7. one end-to-end real-project validation.
+7. one end-to-end realistic greenfield validation.
 
-Items 1–5 exist at an experimental synthesized level. OpenSpec schema discovery/validation and dependency-graph checks for item 6 have passed; runtime Skill invocation and approval-stop behavior are the remaining Phase C checks. Item 7 follows after those pass.
+Items 1–6 have now been demonstrated at an experimental level, including positive and negative approval-path runtime validation. Item 7 is the current milestone work.
