@@ -1,14 +1,15 @@
 # Design Before Code — Roadmap
 
-This roadmap follows `docs/PROJECT-CHARTER.md`: the project is not a database-only tool. Its purpose is to make consequential business, UX, and data-model decisions reviewable before implementation.
+This roadmap follows `docs/PROJECT-CHARTER.md`: the project exists to make consequential business, UX, and data-model decisions reviewable before implementation.
 
 ## Current state
 
-Implemented minimum usable versions:
+The first four-skill loop now has minimum usable versions:
 
 - `business-domain-design` — v0.1
 - `ux-flow-design` — v0.1
 - `data-model-design` — v0.2.1
+- `design-readiness-review` — v0.1
 
 Infrastructure:
 
@@ -18,186 +19,134 @@ Infrastructure:
 - manufacturing example
 - OpenSpec integration notes
 
-Missing from the first complete loop:
-
-- `design-readiness-review` v0.1
-
-## Target skill set
-
-The first complete product loop contains four skills.
+## Core skill set
 
 ### 1. `business-domain-design`
 
-Purpose: convert meeting notes, rough requirements, stakeholder explanations, and partial understanding into a reviewable business model before database or UI design.
+Answers: **What business world are we actually building?**
 
-Primary outputs:
-
-- actors and goals;
-- terminology / ubiquitous language without requiring users to know DDD jargon;
-- business concepts and responsibilities;
-- lifecycle and state changes;
-- business events;
-- rules and invariants;
-- normal and exceptional flows;
-- FACT / INFERENCE / RECOMMENDATION / ASSUMPTION / DECISION REQUIRED;
-- explicit questions that materially affect downstream UX or data design.
-
-Non-goal: automatically force full DDD, aggregates, event sourcing, or bounded contexts onto simple CRUD systems.
-
-This skill answers: **What business world are we actually building?**
+Turns notes/requirements into actors, terminology, concepts, lifecycles, states/events, rules, scenarios, decision provenance, and downstream constraints without forcing ritual DDD.
 
 ### 2. `ux-flow-design`
 
-Purpose: make the user's path through the product visible before pages/components are implemented.
+Answers: **How does a human accomplish the business task naturally?**
 
-Primary outputs:
-
-- actor jobs and task priorities;
-- information architecture based on user goals rather than backend entities;
-- primary journeys and decision points;
-- page/surface responsibilities;
-- page vs dialog/drawer decisions;
-- normal path and recovery path;
-- empty/loading/error/permission/conflict states;
-- low-fidelity wireframes;
-- downstream API/data implications created by UX promises;
-- explicit interaction decisions that remain unresolved.
-
-Non-goal: replace Figma or become a visual branding/design-system generator.
-
-This skill answers: **How does a human accomplish the business task naturally?**
+Designs task-first information architecture, journeys, surface responsibilities, failure/recovery states, historical/backdated interaction behavior, and low-fidelity wireframes before frontend implementation.
 
 ### 3. `data-model-design`
 
-Purpose: turn approved business semantics into a reviewable conceptual, logical, physical, temporal, and scenario-tested data model.
+Answers: **What data exists, why does it exist, and will history still mean the right thing later?**
 
-Current implementation exists and will continue to evolve through compact regression cases rather than repeated full A/B experiments.
-
-This skill answers: **What data exists, why does it exist, and will history still mean the right thing later?**
+Designs conceptual/logical/physical candidates, integrity, redundancy, temporal semantics, scenario validation, and a human decision gate.
 
 ### 4. `design-readiness-review`
 
-Purpose: cross-review the three design views before implementation.
+Answers: **Do the business model, user flow, and data model describe the same system?**
 
-It should detect contradictions such as:
+Cross-checks decision provenance, terminology, lifecycles, task traceability, UX promises, data constraints, historical semantics, and a cross-artifact scenario; produces READY / NEEDS DECISION / NOT READY.
 
-- UX expects an edit/recovery behavior that the lifecycle model forbids;
-- business model says Plan and Actual have separate lifecycles while the data model collapses them;
-- data model supports multiple versions but the UX hides the version choice;
-- UX requires historical display semantics not preserved by the data model;
-- a DECISION REQUIRED item was silently resolved in another artifact;
-- a core user task has no supported data/business path;
-- UX promises draft/conflict/recovery behavior that downstream APIs/data cannot support;
-- data model encodes a state transition the business model never defined.
-
-Primary output:
-
-- consistency findings;
-- blocked decisions;
-- scenario walkthrough across business + UX + data;
-- READY / NEEDS DECISION / NOT READY implementation gate.
-
-This skill answers: **Do the business model, user flow, and data model describe the same system?**
-
-## Development sequence
+## Development phases
 
 ### Phase A — Complete the design triangle
 
-Status: **complete at minimum-usable level**.
+**Complete at minimum-usable level.**
 
-1. `business-domain-design` v0.1 — done.
-2. `ux-flow-design` v0.1 — done.
-3. `data-model-design` v0.2.1 — done.
-4. Each has compact unit/regression evals.
-
-Do not try to make any one skill perfect before the cross-artifact reviewer exists.
+- business-domain-design v0.1
+- ux-flow-design v0.1
+- data-model-design v0.2.1
 
 ### Phase B — Cross-artifact review
 
-Current phase.
+**Initial implementation complete.**
 
-5. Build `design-readiness-review` v0.1.
-6. Add compact evals for contradictions across artifacts.
-7. Use one realistic greenfield scenario to run:
+- design-readiness-review v0.1 exists
+- compact contradiction evals exist
+
+Next, run low-cost cross-artifact evals to ensure the reviewer routes defects to the correct owning layer rather than becoming a universal designer.
+
+### Phase C — OpenSpec orchestration
+
+**Next major phase.**
+
+Create an OpenSpec workflow/schema where artifacts depend on one another:
 
 ```text
-requirements / meeting notes
+proposal / requirements
         ↓
-business-domain-design
+business-model
         ↓
-ux-flow-design
+ux-flow
         ↓
-data-model-design
+data-model
         ↓
 design-readiness-review
         ↓
 human approval
+        ↓
+tasks / implementation
 ```
 
-The first end-to-end test should focus on cross-artifact consistency, not on maximizing the quality of any one document.
+Goals:
 
-### Phase C — OpenSpec orchestration
+- keep each core Skill independently usable;
+- make artifact dependencies explicit;
+- prevent `tasks` / implementation from starting while readiness is NEEDS DECISION or NOT READY;
+- prevent the agent from self-approving human decisions;
+- allow upstream artifact revisions when readiness review routes a defect back.
 
-8. Create an OpenSpec custom schema/integration that treats these artifacts as dependencies.
-9. Block implementation until `design-readiness-review` is resolved and human approval exists.
-10. Keep each skill independently usable outside OpenSpec.
+### Phase D — End-to-end milestone validation
 
-### Phase D — Broaden confidence
+After orchestration exists, run one realistic greenfield requirement through all four Skills.
 
-11. Add cross-domain benchmarks only at milestones.
-12. Improve documentation and installation guidance.
-13. Consider early-MVP review mode after greenfield behavior is stable.
+This is a Level 3 Domain Benchmark, not a routine development loop.
 
-## Near-term version plan
+Measure primarily:
 
-### `business-domain-design v0.1.x`
+- whether artifacts stay semantically aligned;
+- whether unresolved decisions remain visible;
+- whether UX promises have business/data support;
+- whether the readiness reviewer catches cross-artifact drift;
+- whether the human can understand and approve the design before coding.
 
-Maintenance only until cross-artifact review reveals a general gap.
+### Phase E — Broaden confidence
 
-### `ux-flow-design v0.1.x`
+Only after the first end-to-end loop is stable:
 
-Maintenance only until cross-artifact review reveals a general gap.
+- add milestone cross-domain benchmarks;
+- improve installation/use documentation;
+- refine Skill interoperability;
+- consider early-MVP review mode;
+- consider a separate brownfield/reverse-engineering project or skill family if justified.
 
-### `data-model-design v0.2.x`
+## Near-term maintenance policy
 
-Maintenance only:
+Until Phase C/D reveals a general issue:
 
-- correctness fixes;
-- compact regression cases;
-- no more manufacturing-specific expansion unless the rule generalizes.
+- `business-domain-design v0.1.x`: compact correctness/regression fixes only.
+- `ux-flow-design v0.1.x`: compact correctness/regression fixes only.
+- `data-model-design v0.2.x`: correctness and domain-general regression fixes only.
+- `design-readiness-review v0.1.x`: focus on cross-artifact consistency and routing defects to the right layer.
 
-### `design-readiness-review v0.1`
-
-Next new skill.
-
-Minimum usable behavior:
-
-- consumes business-domain, UX-flow, and data-model artifacts;
-- compares semantics instead of summarizing them independently;
-- traces every major user task to a business rule/lifecycle and supporting data capability;
-- checks every material data constraint against the business model;
-- checks UX promises such as draft, correction, conflict recovery, historical entry, partial fulfillment, and destructive actions against business/data support;
-- detects DECISION REQUIRED items that another artifact silently resolved;
-- runs at least one cross-artifact scenario;
-- produces READY / NEEDS DECISION / NOT READY plus a concise blocking list.
+Do not substantially expand one Skill merely because it failed a single domain-specific benchmark.
 
 ## What we should not do next
 
-- Keep polishing one Skill until it becomes a giant prompt.
-- Build OpenSpec orchestration before `design-readiness-review` exists.
-- Create a full brownfield reverse-engineering skill.
-- Add Figma/design-system implementation before task-flow reasoning is stable.
-- Require repeated no-skill A/B tests for routine changes.
-- Treat cross-artifact inconsistencies as a reason to immediately expand all three upstream Skills; first decide which layer owns the missing reasoning.
+- Keep polishing any one Skill until it becomes a giant prompt.
+- Add Figma/design-system generation before task-flow reasoning has been validated end to end.
+- Build a full legacy/brownfield reverse-engineering framework.
+- Require repeated no-skill A/B tests for routine edits.
+- Let `design-readiness-review` silently fix product decisions rather than route them upstream.
+- Let OpenSpec become the product identity; it is the orchestration layer.
 
 ## Definition of the first meaningful milestone
 
-The project reaches its first meaningful multi-skill milestone when a user can provide rough meeting notes and obtain, before coding:
+The first meaningful milestone is reached when a user can provide rough meeting notes and obtain, before coding:
 
 1. a business/domain model they can understand;
 2. a page/task flow they can challenge;
 3. a data model they can review;
 4. a cross-artifact readiness report;
-5. an explicit human gate before implementation.
+5. an explicit human approval gate;
+6. orchestration that prevents implementation from starting before those gates are satisfied.
 
-At that point the project solves the original 0→1 problem end-to-end rather than solving only database or page design.
+The four design Skills now cover items 1–5 at an experimental/minimum-usable level. The next milestone work is item 6: orchestration and one end-to-end validation.
