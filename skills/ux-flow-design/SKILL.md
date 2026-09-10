@@ -1,3 +1,8 @@
+---
+name: ux-flow-design
+description: Design task-first user journeys, information architecture, states, and recovery behavior before frontend implementation.
+---
+
 # ux-flow-design
 
 Design and review user task flows before frontend implementation. Optimize for task clarity, low friction, recoverability, and human reviewability before visual polish or component selection.
