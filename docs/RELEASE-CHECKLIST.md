@@ -39,16 +39,44 @@ No repository-wide tag has been created yet.
 
 Before creating the tag:
 
-- [ ] Pull the latest `main` into a clean local clone.
-- [ ] Verify the four `SKILL.md` frontmatters parse and their names match their directories.
-- [ ] Verify all documented Skill version strings match the files themselves.
+- [ ] Pull the latest `main` into the local release clone and confirm the working tree is clean.
+- [x] Verify the four `SKILL.md` frontmatters/names match their directories.
+- [x] Verify all documented Skill version strings match the files themselves.
 - [ ] Verify README / docs relative links render correctly on GitHub.
-- [ ] Validate the bundled OpenSpec schema **from an initialized temporary/target OpenSpec project after copying the bundle to `openspec/schemas/design-before-code/`**. The repository root is the bundle source, not itself an installed OpenSpec schema location.
-- [ ] Confirm no benchmark-specific domain rule leaked into a core Skill.
-- [ ] Confirm no temporary Phase D OpenSpec artifacts were added to the repository as product templates.
-- [ ] Confirm `human-approval.md` remains a human-only contract in integration instructions.
-- [ ] Confirm examples are labeled illustrative and evals are labeled evidence, not canonical product designs.
+- [x] Validate the bundled OpenSpec schema **from an initialized temporary/target OpenSpec project after copying the bundle to `openspec/schemas/design-before-code/`**. The repository root is the bundle source, not itself an installed OpenSpec schema location.
+- [x] Confirm no Phase D benchmark-specific domain rule leaked into a core Skill.
+- [x] Confirm no temporary Phase D OpenSpec artifacts were added to the repository as product templates.
+- [x] Confirm `human-approval.md` remains a human-only contract in integration instructions.
+- [x] Confirm examples are labeled illustrative and evals are labeled evidence, not canonical product designs.
 - [ ] Review `CHANGELOG.md` Unreleased section and freeze release notes.
+
+### Observed OpenSpec release-check — PASS (2026-09-11)
+
+Validation was run from a clean temporary OpenSpec project after installing the repository bundle into the documented project-local schema location.
+
+Observed discovery:
+
+```text
+Project schemas:
+  design-before-code
+
+Package schemas:
+  spec-driven
+```
+
+Observed validation:
+
+```text
+Validating design-before-code...
+  Checking schema.yaml exists...
+  Parsing YAML...
+  Validating schema structure...
+  Checking template files...
+  Dependency graph validation passed (via parseSchema)
+✓ Schema 'design-before-code' is valid
+```
+
+Running the same validation command directly from the Design Before Code repository root still reports only `spec-driven`. That is expected: `integrations/openspec/design-before-code/` is the distributable bundle source, while OpenSpec discovers the project schema only after installation to `openspec/schemas/design-before-code/` (or another supported discovery location).
 
 Recommended PowerShell validation from the repository root:
 
@@ -69,8 +97,6 @@ openspec schema which --all
 openspec schema validate design-before-code --verbose
 Pop-Location
 ```
-
-Expected discovery includes a project-local `design-before-code` schema. Validation should pass YAML, schema structure, template references, and dependency-graph checks.
 
 These are structural/release checks. They do **not** require another paid Level 3 model benchmark.
 
