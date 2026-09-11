@@ -32,7 +32,7 @@ The schema deliberately keeps OpenSpec's strengths after the design gate: delta 
 
 Validated locally with **OpenSpec 1.8.0** on 2026-09-10.
 
-The following checks passed against a clean temporary OpenSpec project:
+Schema/CLI checks passed against a clean temporary OpenSpec project:
 
 ```text
 openspec schema which --all
@@ -50,12 +50,15 @@ openspec schema which design-before-code
 
 openspec new change dbc-smoke --schema design-before-code
 → change created successfully
-
-openspec status --change dbc-smoke
-→ 0/9 artifacts complete
-→ proposal ready
-→ all downstream artifacts blocked by the expected dependency chain
 ```
+
+Runtime validation also passed at the current experimental level:
+
+- all four companion Skills were actually delegated to;
+- the agent stopped at `READY_FOR_HUMAN_APPROVAL` without creating/modifying `human-approval.md`;
+- `APPROVAL: PENDING` remained semantically blocked even after OpenSpec structurally unlocked specs;
+- human-authored `APPROVAL: APPROVED` allowed specs → technical-design → tasks;
+- planning reached 9/9 artifacts without running `apply` or writing application code.
 
 Observed dependency graph:
 
@@ -73,7 +76,9 @@ proposal
 
 `data-model` also requires `business-model`; `technical-design` also requires `data-model` and `human-approval`; `tasks` also requires `human-approval` and `specs`.
 
-This proves schema discovery, YAML/template validity, and artifact dependency structure. It does **not** yet prove runtime Skill invocation or the human-approval stop behavior; those are the next integration tests.
+Detailed evidence is recorded in [`VALIDATION.md`](VALIDATION.md).
+
+The later Phase D Level 3 domain benchmark also reached `READY_FOR_HUMAN_APPROVAL`; that benchmark validates the design method rather than adding a new OpenSpec schema claim. See [`../../../evals/level3-training-reimbursement.md`](../../../evals/level3-training-reimbursement.md).
 
 ## Required companion skills
 
@@ -114,6 +119,8 @@ Validate after copying:
 openspec schema validate design-before-code
 openspec schema which design-before-code
 ```
+
+For Skill installation and update guidance, see [`../../../docs/INSTALLATION.md`](../../../docs/INSTALLATION.md).
 
 ## Human approval semantics
 
