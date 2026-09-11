@@ -7,7 +7,7 @@ description: Design and review conceptual, logical, physical-candidate, temporal
 
 Design and review an application data model before implementation. Optimize for human reviewability first, database correctness second, and implementation convenience third.
 
-**Current behavior target: v0.2.2.**
+**Current behavior target: v0.2.3.**
 
 ## When to use
 
@@ -21,10 +21,11 @@ Do not use it as a full legacy-database reverse-engineering or migration framewo
 2. **Do not silently turn recommendations, framework conventions, or plausible assumptions into business facts.**
 3. **Do not finalize a physical representation while a material business decision that changes that representation is unresolved.**
 4. **Do not accept duplicated or transitively derivable facts without an explicit redundancy review.**
-5. **Do not claim historical correctness without distinguishing business-effective time from system recording time.**
-6. **Do not claim a duplicated fact cannot be protected by the database until declarative integrity options in the target database have been considered.**
-7. **Do not treat input/display units as an approved canonical storage unit when calculations or precision depend on that choice.**
-8. **Do not equate a coherent data model with approval to implement.** A data-model artifact can be ready for downstream technical design while cross-artifact readiness and human approval are still pending.
+5. **Do not keep two stored relationship paths to the same business identity merely for query convenience.** Remove the redundant path or prove why both are required and how they are forced to agree.
+6. **Do not claim historical correctness without distinguishing business-effective time from system recording time.**
+7. **Do not claim a duplicated fact cannot be protected by the database until declarative integrity options in the target database have been considered.**
+8. **Do not treat input/display units as an approved canonical storage unit when calculations or precision depend on that choice.**
+9. **Do not equate a coherent data model with approval to implement.** A data-model artifact can be ready for downstream technical design while cross-artifact readiness and human approval are still pending.
 
 Before implementation, make the design visible in this sequence:
 
@@ -123,6 +124,18 @@ For every stored foreign key or business attribute that may be derivable through
 3. What is the authoritative source of truth?
 4. What concrete performance, historical, integration, partitioning, uniqueness, or integrity reason justifies duplication?
 5. What declarative mechanisms in the target database could enforce consistency if both remain?
+6. Is the same business identity reachable through another stored relationship path? If so, do the two paths necessarily identify the same object, or can they diverge?
+
+##### Mandatory dual-path identity check
+
+When two stored relationship paths identify the same business object, treat that as a specific integrity risk, not merely a general redundancy note.
+
+Prefer one of these outcomes:
+
+- **remove the redundant path**, keeping one authoritative relationship; or
+- **retain both only with justification and an explicit consistency mechanism** that forces them to agree, such as an appropriate composite key/foreign key design, trigger, generated constraint strategy, or another concrete invariant supported by the target database.
+
+Query convenience alone is not sufficient justification. Do not claim “the paths should match” without showing how mismatch is prevented or why one path is not stored.
 
 Before saying "the database cannot enforce this," consider applicable mechanisms such as composite foreign keys backed by composite UNIQUE keys, CHECK constraints, generated columns, exclusion/partial constraints where supported, or a different key design. State target-database limitations precisely rather than generically.
 
@@ -133,6 +146,17 @@ Example pattern to challenge:
 If both are kept, classify the duplication, identify the source of truth, and show how contradictions are prevented. Otherwise prefer the non-redundant representation.
 
 Redundancy review is not automatic redundancy rejection: a duplicate may be justified if its invariant is explicit and enforceable enough for the risk it introduces.
+
+#### Stored derived values
+
+If a derivable sequence, counter, status, amount, label, or other value is stored for usability or performance, do not stop at “application-enforced.” Record:
+
+- the authoritative facts from which it derives;
+- why storing it is justified;
+- the exact uniqueness/consistency mechanism that prevents duplicate, stale, reordered, or contradictory values;
+- whether that mechanism is declarative, transactional, trigger-based, or application-level, and what race/conflict behavior still needs technical design.
+
+If no concrete consistency mechanism is justified, prefer deriving the value rather than storing it.
 
 #### Canonical units and quantities
 
@@ -194,6 +218,19 @@ Explicitly review names, prices, classifications, versions, standards, ownership
 
 Never duplicate a mutable field merely "for convenience" without saying whether the duplicate is a value snapshot, historical relationship reference, cache/denormalization, integration copy, or mistake.
 
+#### Reference + snapshot review
+
+When both a relationship reference and copied snapshot values are retained for the same historical outcome, explicitly state:
+
+- which fact is authoritative for identity/lineage;
+- which snapshot values are authoritative for historical interpretation or reproduction;
+- whether the referenced row may mutate after it has been applied;
+- if mutation is allowed, why the snapshots preserve the intended semantics;
+- if mutation is forbidden after use, what enforces immutability;
+- whether future changes require a new effective-dated row/version rather than rewriting the applied definition.
+
+Snapshots are a preservation mechanism, not permission to silently rewrite already-applied historical definitions.
+
 Read `references/temporal-data.md` when temporal behavior is consequential.
 
 ### 6. Scenario simulation
@@ -232,6 +269,9 @@ Call out specifically:
 - redundant fields or tables;
 - **transitively derivable fields** and duplicated business facts;
 - contradictory foreign-key paths and whether declarative constraints can prevent them;
+- **dual relationship paths to the same business identity and how agreement is guaranteed or redundancy removed**;
+- stored derived values whose exact consistency/uniqueness mechanism is missing;
+- reference + snapshot combinations whose authority/mutability/history semantics are unclear;
 - ambiguous ownership;
 - many-to-many relationships without an explicit associative concept;
 - missing uniqueness constraints;
@@ -265,6 +305,7 @@ Never treat this skill's own readiness result as approval on the user's behalf. 
 - Data integrity should not depend only on application code when the database can enforce the rule safely.
 - Normalize to a clear baseline before intentional denormalization.
 - Trace transitive dependencies, not only duplicate column names.
+- Trace duplicate identity paths, not only duplicate values; two pointers to the same business object need one source or an agreement invariant.
 - Explore declarative integrity mechanisms before declaring an invariant unenforceable in the database.
 - Historical truth must be designed around business-effective time and change semantics, not merely row timestamps.
 - A stable foreign-key identity is not automatically a value snapshot.
