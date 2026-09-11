@@ -7,7 +7,7 @@ description: Design task-first user journeys, information architecture, states, 
 
 Design and review user task flows before frontend implementation. Optimize for task clarity, low friction, recoverability, and human reviewability before visual polish or component selection.
 
-**Current behavior target: v0.2.**
+**Current behavior target: v0.2.1.**
 
 This Skill synthesizes BMad-style behavioral UX planning (journeys, information architecture, state coverage, reviewer closure) with Superpowers-style design-before-implementation gating. It deliberately excludes visual-brand-system work from the core flow.
 
@@ -26,9 +26,10 @@ Do not use this skill as a visual-branding system, design-token generator, high-
 3. **Do not optimize for fewer clicks in isolation; optimize for fewer unnecessary decisions, lower cognitive load, and clear task completion.**
 4. **Do not design only the happy path. Relevant loading, empty, validation, permission, conflict, failure, offline, and recovery states are part of the UX contract.**
 5. **Do not hide consequential product decisions inside interaction details. Mark unresolved behavior as DECISION REQUIRED.**
-6. **Do not use visual polish to compensate for an unclear task flow. Behavior comes before styling.**
-7. **Do not force desktop-SaaS patterns, wizard patterns, modal dialogs, tabs, or tables unless they fit the user task.**
-8. **Do not begin frontend implementation before the behavioral UX artifact has been presented for human review.**
+6. **Unresolved means uninstantiated.** If a consequential choice is DECISION REQUIRED, do not silently encode one candidate answer in actor ownership, permissions, navigation ownership, surface responsibility, lifecycle/state transitions, confirmation copy, multiplicity/uniqueness, or downstream data/API implications.
+7. **Do not use visual polish to compensate for an unclear task flow. Behavior comes before styling.**
+8. **Do not force desktop-SaaS patterns, wizard patterns, modal dialogs, tabs, or tables unless they fit the user task.**
+9. **Do not begin frontend implementation before the behavioral UX artifact has been presented for human review.**
 
 ## Behavioral UX contract
 
@@ -73,6 +74,8 @@ Summarize the UX problem and classify consequential statements as:
 Existing menus/pages/routes are implementation context, not automatically the desired UX.
 
 If upstream `business-domain-design` contains unresolved lifecycle/ownership decisions that materially change the user flow, keep the affected UX element blocked rather than silently choosing one branch.
+
+When a consequential choice is **DECISION REQUIRED**, keep every dependent UX surface neutral, blocked, or explicitly provisional. Do not say that a role, permission, multiplicity, or lifecycle rule is unresolved while assigning a concrete answer elsewhere in the same artifact. Before readiness, scan actor tasks, IA, surfaces, state tables, exception flows, wireframes, and downstream implications for such silent instantiation.
 
 ## 2. Actors, jobs, and task priorities
 
@@ -229,6 +232,19 @@ The flow should explain recovery, not merely name the error.
 
 If exception behavior depends on unresolved business policy, mark **DECISION REQUIRED**.
 
+### Reachability / gate-algebra review
+
+Before treating an exception, recovery, or concurrency path as part of the behavioral contract, prove that its source state is reachable under the already-defined lifecycle, time, and permission gates.
+
+For each important path ask:
+
+1. What state must exist before the path begins?
+2. Which actions are legally enabled in that state?
+3. If the path assumes two concurrent actions, can both actually be enabled at the same time?
+4. Do lifecycle, timing, ownership, or permission gates make the scenario impossible?
+
+If the path is impossible, remove it from the normal behavioral contract. If stale requests or defensive server validation still justify handling it, label it explicitly **defensive-only** rather than presenting it as a normal user recovery journey. Do not invent a replacement workflow merely to fill the gap.
+
 ## 8. Low-fidelity wireframes
 
 Use simple ASCII, Markdown, or Mermaid sketches to expose hierarchy and interaction before visual styling.
@@ -289,7 +305,8 @@ Then run the broader friction audit:
 - current-state defaults that become wrong for historical/backdated work;
 - admin-heavy design imposed on high-frequency operational users;
 - speculative screens for future requirements;
-- information displayed because it exists in the database rather than because it helps the task.
+- information displayed because it exists in the database rather than because it helps the task;
+- exception/recovery states whose prerequisites are impossible under the defined lifecycle/time/permission gates.
 
 Read `references/ux-flow-principles.md` for deeper guidance.
 
@@ -326,3 +343,5 @@ Present the behavioral UX artifact for human correction/approval before frontend
 - Different actors may need different task flows over the same business concepts.
 - Avoid speculative pages and generic dashboards without a concrete user job.
 - Optimize artifacts so a normal developer or product owner can review the flow without being a UX specialist.
+- A DECISION REQUIRED item stays semantically uninstantiated until a human resolves it; blocked means blocked across the whole UX artifact.
+- Do not present unreachable states as normal recovery behavior; prove reachability or label defensive handling explicitly.
