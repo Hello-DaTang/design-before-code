@@ -43,7 +43,8 @@ Before creating the tag:
 - [x] Verify the four `SKILL.md` frontmatters/names match their directories.
 - [x] Verify all documented Skill version strings match the files themselves.
 - [ ] Verify README / docs relative links render correctly on GitHub.
-- [x] Validate the bundled OpenSpec schema **from an initialized temporary/target OpenSpec project after copying the bundle to `openspec/schemas/design-before-code/`**. The repository root is the bundle source, not itself an installed OpenSpec schema location.
+- [x] Validate the bundled OpenSpec schema **from an initialized temporary/target OpenSpec project after installing the bundle to `openspec/schemas/design-before-code/`**. The repository root is the bundle source, not itself an installed OpenSpec schema location.
+- [ ] Verify the recommended **zero-clone install path** from a clean temporary project: `openspec init` → `npx skills add Hello-DaTang/design-before-code --all ...` → `npx degit .../integrations/openspec/design-before-code openspec/schemas/design-before-code` → schema validation.
 - [x] Confirm no Phase D benchmark-specific domain rule leaked into a core Skill.
 - [x] Confirm no temporary Phase D OpenSpec artifacts were added to the repository as product templates.
 - [x] Confirm `human-approval.md` remains a human-only contract in integration instructions.
@@ -78,25 +79,33 @@ Validating design-before-code...
 
 Running the same validation command directly from the Design Before Code repository root still reports only `spec-driven`. That is expected: `integrations/openspec/design-before-code/` is the distributable bundle source, while OpenSpec discovers the project schema only after installation to `openspec/schemas/design-before-code/` (or another supported discovery location).
 
-Recommended PowerShell validation from the repository root:
+### Zero-clone installation smoke to run before tagging
+
+Run from any directory; this creates only a temporary test project:
 
 ```powershell
-$test = Join-Path $env:TEMP "dbc-openspec-release-check"
+$test = Join-Path $env:TEMP "dbc-zero-clone-check"
 Remove-Item -Recurse -Force $test -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force $test | Out-Null
-
-openspec init $test --tools none
-
-New-Item -ItemType Directory -Force "$test\openspec\schemas" | Out-Null
-Copy-Item -Recurse -Force `
-  ".\integrations\openspec\design-before-code" `
-  "$test\openspec\schemas\"
-
 Push-Location $test
+
+openspec init . --tools none
+npx skills add Hello-DaTang/design-before-code --all -a codex -y
+npx degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
+
 openspec schema which --all
 openspec schema validate design-before-code --verbose
+
+Get-ChildItem .agents\skills
 Pop-Location
 ```
+
+Expected result:
+
+- the four core Skills exist in the Codex project-local Skill location;
+- `design-before-code` appears as a project schema;
+- schema validation passes;
+- no Design Before Code repository clone exists inside the temporary application project.
 
 These are structural/release checks. They do **not** require another paid Level 3 model benchmark.
 
@@ -109,7 +118,8 @@ The alpha may claim:
 - tested OpenSpec orchestration at the documented experimental level;
 - one realistic Level 3 readiness benchmark;
 - artifact-based mixed-agent continuation evidence;
-- explicit human approval boundary.
+- explicit human approval boundary;
+- zero-clone installation from the public GitHub repository once the smoke above passes.
 
 The alpha must **not** claim:
 
