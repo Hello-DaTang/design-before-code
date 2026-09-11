@@ -6,11 +6,11 @@ Method evolution must also follow [`docs/METHOD-SYNTHESIS.md`](METHOD-SYNTHESIS.
 
 ## Current state
 
-The first four-skill loop has synthesized minimum-usable versions:
+The first four-skill loop has synthesized and benchmarked minimum-usable versions:
 
-- `business-domain-design` — v0.2
-- `ux-flow-design` — v0.2
-- `data-model-design` — v0.2.2
+- `business-domain-design` — v0.2.2
+- `ux-flow-design` — v0.2.1
+- `data-model-design` — v0.2.3
 - `design-readiness-review` — v0.2
 
 Infrastructure:
@@ -18,10 +18,11 @@ Infrastructure:
 - Project Charter / anti-drift rules
 - Method Synthesis / upstream influence map
 - low-cost Evaluation Protocol
-- per-skill regression evals
+- per-skill focused regression evals
 - manufacturing example
 - OpenSpec custom schema bundle under `integrations/openspec/design-before-code/`
 - recorded OpenSpec validation evidence in `integrations/openspec/design-before-code/VALIDATION.md`
+- first Level 3 realistic benchmark evidence in `evals/level3-training-reimbursement.md`
 
 ## Core skill set
 
@@ -55,9 +56,9 @@ Synthesizes readiness/cohesion review, staged gates, and explicit human approval
 
 **Complete at minimum-usable level.**
 
-- business-domain-design v0.2
-- ux-flow-design v0.2
-- data-model-design v0.2.2
+- business-domain-design established
+- ux-flow-design established
+- data-model-design established
 - upstream method synthesis documented
 
 ### Phase B — Cross-artifact review
@@ -130,67 +131,75 @@ Design choices retained:
 - acknowledge that OpenSpec `requires` edges are artifact-availability relationships, not actor-authenticated business gates;
 - leave identity-level enforcement to optional external CI/hook/review integration.
 
-Phase C should now remain stable unless a later realistic benchmark reveals a general orchestration or gate defect.
+Phase C should remain stable unless a later realistic benchmark reveals a general orchestration or gate defect.
 
 ### Phase D — End-to-end milestone validation
 
-**Current phase.**
+**Complete at the current experimental level.**
 
-Run one realistic, moderately complex greenfield requirement through:
+The first Level 3 Domain Benchmark used **Employee Training Request + Training Expense Reimbursement** and reached:
 
 ```text
-requirements
-→ proposal
-→ business-model
-→ ux-flow
-→ data-model
-→ design-readiness
-→ human decisions / approval
-→ specs
-→ technical-design
-→ tasks
+READINESS: READY_FOR_HUMAN_APPROVAL
 ```
 
-This is a Level 3 Domain Benchmark, not a routine development loop.
+The run was intentionally bounded:
 
-The benchmark should be meaningfully harder than Product Category CRUD and should contain enough lifecycle, exception, permission, and mutable-policy behavior to exercise the chain without becoming a giant architecture exercise.
+- one realistic greenfield domain;
+- mixed-agent continuation to exercise interoperability;
+- no no-skill baseline;
+- no A/B loop;
+- no memory/session clearing;
+- no apply/code;
+- no repeat of the Product Category smoke case.
 
-Measure primarily:
+The benchmark exercised lifecycle, exception, permission, historical decision, effective-dated policy, calculation, payment outcome, and human-decision gates.
 
-- whether modeling depth is proportional to the real domain complexity;
-- whether materially different lifecycles are discovered rather than collapsed into one record/status;
-- whether unresolved decisions remain visible and actually interrupt downstream design when necessary;
-- whether UX journeys, states, and recovery behaviors stay aligned with business rules;
-- whether data identity, integrity, and temporal semantics support those UX promises;
-- whether readiness routes contradictions to the correct owning Skill rather than silently fixing them;
-- whether a human can understand exactly what is being approved;
-- whether approved semantics remain stable through OpenSpec specs, technical design, and tasks;
-- whether planning remains distinct from apply / coding;
-- whether upstream-inspired mechanisms improve behavior without adding unnecessary ceremony.
+General findings were absorbed as compact v0.2.x correctness improvements:
 
-Do not grade the benchmark by requiring one canonical schema or one preferred UI. Grade decision transparency, semantic coherence, appropriate complexity, and correct gate behavior.
+- `business-domain-design v0.2.2` — reconcile a human-resolved decision through every affected active section before readiness;
+- `ux-flow-design v0.2.1` — unresolved means uninstantiated; validate exception/recovery reachability with lifecycle/time/permission gate algebra;
+- `data-model-design v0.2.3` — strengthen dual-path identity, stored-derived-value, and reference+snapshot integrity review;
+- `design-readiness-review v0.2` — no version bump; it correctly found reconciliation and reachability defects, withheld readiness, routed owners, and later returned READY after correction.
 
-### Phase E — Stronger enforcement and broader confidence
+Detailed evidence and defect classification are recorded in `evals/level3-training-reimbursement.md`.
 
-Only after the first end-to-end loop is stable:
+Do **not** immediately rerun this benchmark after the compact Skill fixes. The fixes are covered by focused regression definitions instead.
+
+### Phase E — Packaging, release hardening, and broader confidence
+
+**Current phase.**
+
+Near-term priorities:
+
+- improve installation and use documentation;
+- make Skill distribution / project-local installation straightforward across supported agents;
+- document a small end-to-end example without turning it into a new paid benchmark;
+- clarify experimental/alpha stability boundaries;
+- verify version references and packaging consistency;
+- prepare the repository for an early alpha release.
+
+Only after packaging/release hardening is stable should broader confidence work expand:
 
 - decide whether optional CI/hook approval enforcement is worth adding;
-- add milestone cross-domain benchmarks;
-- improve installation/use documentation;
-- refine Skill interoperability and distribution;
+- add milestone cross-domain benchmarks when a genuinely different domain is needed;
+- refine Skill interoperability and distribution from observed agent differences;
 - periodically review mature upstream methods for transferable improvements;
 - consider early-MVP review mode;
 - consider a separate brownfield/reverse-engineering project or skill family if justified.
 
+Do not claim production stability from one Level 3 benchmark.
+
 ## Near-term maintenance policy
 
-Until Phase D reveals a general issue:
+After Phase D:
 
 - `business-domain-design v0.2.x`: compact correctness fixes only.
 - `ux-flow-design v0.2.x`: compact correctness fixes only.
 - `data-model-design v0.2.x`: correctness and domain-general regression fixes only.
-- `design-readiness-review v0.2.x`: cross-artifact correctness and routing fixes only.
+- `design-readiness-review v0.2.x`: cross-artifact correctness and routing fixes only when a verified defect exists.
 - OpenSpec schema: fix only verified orchestration, compatibility, or gate failures; do not duplicate Skill logic into schema instructions.
+- Prefer focused regression definitions over another Level 3 run for ordinary v0.2.x fixes.
 
 ## What we should not do next
 
@@ -205,6 +214,7 @@ Until Phase D reveals a general issue:
 - Let OpenSpec become the product identity; it remains the orchestration layer.
 - Claim schema dependencies alone provide authenticated human approval.
 - Re-run the Product Category smoke case as a benchmark; it has already served its orchestration purpose.
+- Re-run the Training Reimbursement Level 3 benchmark merely because compact v0.2.x fixes were made.
 
 ## Definition of the first meaningful milestone
 
@@ -218,4 +228,6 @@ The first meaningful milestone is reached when a user can provide rough meeting 
 6. orchestration that preserves those gates before tasks/apply;
 7. one end-to-end realistic greenfield validation.
 
-Items 1–6 have now been demonstrated at an experimental level, including positive and negative approval-path runtime validation. Item 7 is the current milestone work.
+**This milestone has now been reached at an experimental level.**
+
+The next objective is not another benchmark loop; it is packaging and release hardening toward an early alpha while preserving the project's low-cost evaluation discipline.
