@@ -7,7 +7,7 @@ description: Turn rough requirements and meeting notes into a reviewable busines
 
 Turn rough requirements, meeting notes, stakeholder explanations, and partial product understanding into a reviewable business model before UX, database, API, or implementation design.
 
-**Current behavior target: v0.2.1.**
+**Current behavior target: v0.2.2.**
 
 This Skill synthesizes collaborative design-gating ideas from Superpowers, complexity-sensitive planning from BMad, and selected discovery techniques from Domain-Driven Design. It uses those techniques only when they clarify the business problem; it does not force DDD ceremony.
 
@@ -30,7 +30,8 @@ Do not use it as a full DDD transformation, architecture generator, bounded-cont
 7. **Do not resolve consequential product/business ambiguity without making the choice visible to the human reviewer.**
 8. **Do not leave a prerequisite business fact source implicit when later eligibility or lifecycle depends on knowing that fact.** If the system must know that something happened, became effective, was completed, or was verified, identify who/what establishes that fact and when. If the source does not say and different answers change downstream behavior, mark it **DECISION REQUIRED**.
 9. **Do not infer a business calculation formula merely because its parameters are named.** When caps, percentages, rates, thresholds, priorities, or other parameters can be combined in materially different ways, make the composition/order/rounding semantics explicit or mark them **DECISION REQUIRED**.
-10. **Do not hand off to UX, data, planning, or implementation until the business model has been presented for human review.**
+10. **A human-resolved decision must be reconciled through the whole artifact before readiness can advance.** Promoting a decision to FACT in one section while other sections still describe it as unresolved is a blocking contradiction.
+11. **Do not hand off to UX, data, planning, or implementation until the business model has been presented for human review.**
 
 ## Required output sequence
 
@@ -298,6 +299,18 @@ Examples:
 - UX must support cancellation after partial fulfillment.
 - Data model must not assume one Payment if multi-payment remains DECISION REQUIRED.
 
+### Post-decision reconciliation pass
+
+Whenever a human resolves a **DECISION REQUIRED** item, do not only append the answer to a decision ledger. Before declaring readiness:
+
+1. promote the resolution to **FACT**;
+2. reconcile every affected section that exists in the artifact — terminology, actors/responsibilities, concepts, lifecycle/events, rules/invariants, scenarios, model challenges, downstream implications, and the review gate;
+3. keep the old question only when useful for provenance, and then label it explicitly **RESOLVED / historical**;
+4. scan the artifact for stale references such as `unresolved`, `undecided`, `must decide`, `DECISION REQUIRED`, `remains unspecified`, or equivalent wording tied to that resolved decision;
+5. if the header/decision ledger says resolved while another active section still treats the same semantics as open, return **Not ready** or **Needs human decision** until the contradiction is reconciled.
+
+This pass is semantic reconciliation, not prose cleanup: update only sections whose meaning changed because of the human decision.
+
 End with exactly one readiness result:
 
 - **Ready for downstream design** — the business model is coherent and no material semantic ambiguity remains.
@@ -318,3 +331,4 @@ Present the business model for human correction/approval before any downstream i
 - A concept without identity or independent lifecycle may be an attribute/value rather than an entity-like concept.
 - Simplicity is a constraint: every additional concept or boundary must earn its place.
 - Keep unresolved semantics visible for UX and data-model design instead of hiding them in implementation choices.
+- A resolved decision is not complete until all affected active sections agree with it; stale unresolved wording is a semantic defect, not harmless documentation debt.
