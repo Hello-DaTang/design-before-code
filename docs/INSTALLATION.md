@@ -24,17 +24,21 @@ npx --version
 From your existing application/project root:
 
 ```bash
-npx skills add Hello-DaTang/design-before-code --all -a codex -y
+npx -y skills add Hello-DaTang/design-before-code --all -a codex -y
 ```
 
-This scans the repository's canonical `skills/` directory and installs all four core Skills into the project-local location expected by the selected agent.
+The first `-y` belongs to `npx` and suppresses npm's package-install confirmation. The final `-y` belongs to the Skills CLI and accepts its install prompt.
+
+This scans the repository's canonical `skills/` directory and installs all four core Skills into the project-local location used by the selected/universal agent installation strategy.
+
+The Skills CLI may internally fetch or clone the GitHub repository while resolving the source. Zero-clone here means the user does **not** need to create or maintain a Design Before Code working clone inside the application project.
 
 Replace `codex` with another agent supported by the Skills CLI, for example:
 
 ```bash
-npx skills add Hello-DaTang/design-before-code --all -a github-copilot -y
-npx skills add Hello-DaTang/design-before-code --all -a cursor -y
-npx skills add Hello-DaTang/design-before-code --all -a claude-code -y
+npx -y skills add Hello-DaTang/design-before-code --all -a github-copilot -y
+npx -y skills add Hello-DaTang/design-before-code --all -a cursor -y
+npx -y skills add Hello-DaTang/design-before-code --all -a claude-code -y
 ```
 
 The four core Skills are:
@@ -58,7 +62,7 @@ The Codex project-local layout validated by this project is:
         └── design-readiness-review/
 ```
 
-Other agents may use different locations; let the Skills CLI perform that mapping instead of manually copying directories when possible.
+Other agents may use different locations or symlink strategies; let the Skills CLI perform that mapping instead of manually copying directories when possible.
 
 ## 3. Use the Skills without OpenSpec
 
@@ -108,29 +112,32 @@ openspec init
 Install the four Design Before Code Skills:
 
 ```bash
-npx skills add Hello-DaTang/design-before-code --all -a codex -y
+npx -y skills add Hello-DaTang/design-before-code --all -a codex -y
 ```
 
 Then fetch only the OpenSpec schema subdirectory directly into the current project:
 
 ```bash
-npx degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
+npx -y degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
 ```
 
-This downloads the schema files without cloning this repository or adding its Git history to your application repository.
+This installs the schema files without creating a user-managed Design Before Code clone or adding its Git history to your application repository.
 
 Validate discovery and structure:
 
 ```bash
-openspec schema which design-before-code
+openspec schema which --all
 openspec schema validate design-before-code --verbose
 ```
 
-Expected discovery:
+Expected discovery includes:
 
 ```text
-design-before-code    project
-spec-driven           package
+Project schemas:
+  design-before-code
+
+Package schemas:
+  spec-driven
 ```
 
 Then either use the schema per change:
@@ -168,8 +175,8 @@ For a new/current application repository, the intended user experience is:
 
 ```bash
 openspec init
-npx skills add Hello-DaTang/design-before-code --all -a codex -y
-npx degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
+npx -y skills add Hello-DaTang/design-before-code --all -a codex -y
+npx -y degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
 openspec schema validate design-before-code --verbose
 ```
 
@@ -179,7 +186,9 @@ Then start a change:
 openspec new change my-feature --schema design-before-code
 ```
 
-No Design Before Code clone is required.
+No user-managed Design Before Code clone is required.
+
+This zero-clone path was smoke-tested from a clean temporary project on 2026-09-11: all four Skills installed under `.agents/skills/`, `design-before-code` was discovered as a project schema, and verbose schema validation passed YAML, structure, template, and dependency-graph checks.
 
 ## 6. Human approval rule
 
@@ -208,10 +217,10 @@ OpenSpec artifact dependencies do not authenticate who wrote the approval file. 
 Use the Skills CLI update flow when available:
 
 ```bash
-npx skills update
+npx -y skills update
 ```
 
-Or reinstall this collection from the repository using the same `npx skills add ...` command.
+Or reinstall this collection from the repository using the same `npx -y skills add ...` command.
 
 ### Update the OpenSpec schema
 
@@ -221,7 +230,7 @@ The schema directory is ordinary project-local content. For an explicit replacem
 
 ```powershell
 Remove-Item -Recurse -Force .\openspec\schemas\design-before-code
-npx degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
+npx -y degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
 openspec schema validate design-before-code --verbose
 ```
 
@@ -229,7 +238,7 @@ openspec schema validate design-before-code --verbose
 
 ```bash
 rm -rf openspec/schemas/design-before-code
-npx degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
+npx -y degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
 openspec schema validate design-before-code --verbose
 ```
 
