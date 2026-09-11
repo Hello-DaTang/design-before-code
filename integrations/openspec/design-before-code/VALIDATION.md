@@ -183,4 +183,16 @@ Validated with OpenSpec 1.8.0:
 
 The schema still does **not** provide actor-authenticated or cryptographic proof that an approval file was written by a human. Stronger organizational enforcement remains an optional future CI/hook/review concern.
 
-Next milestone: one Level 3 end-to-end greenfield domain benchmark that exercises the full workflow on a realistic, moderately complex requirement rather than a simple orchestration smoke case.
+## Follow-up milestone status
+
+The next planned milestone at the time of the Phase C validation was a realistic Level 3 greenfield domain benchmark.
+
+That milestone has now been completed in Phase D. The mixed-agent Employee Training Request + Expense Reimbursement benchmark reached:
+
+```text
+READINESS: READY_FOR_HUMAN_APPROVAL
+```
+
+without entering application implementation. See [`../../../evals/level3-training-reimbursement.md`](../../../evals/level3-training-reimbursement.md).
+
+Current work has therefore moved to packaging, documentation, interoperability, and alpha release hardening rather than another immediate Level 3 run.
