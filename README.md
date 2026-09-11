@@ -62,8 +62,10 @@ Prerequisites:
 From your existing project root:
 
 ```bash
-npx skills add Hello-DaTang/design-before-code --all -a codex -y
+npx -y skills add Hello-DaTang/design-before-code --all -a codex -y
 ```
+
+The first `-y` belongs to `npx` and suppresses npm's package-install confirmation; the final `-y` belongs to the Skills CLI.
 
 Replace `codex` with the target agent supported by the Skills CLI, for example `github-copilot`, `cursor`, or `claude-code`.
 
@@ -87,14 +89,16 @@ openspec init
 Then install the Skills directly from this repository:
 
 ```bash
-npx skills add Hello-DaTang/design-before-code --all -a codex -y
+npx -y skills add Hello-DaTang/design-before-code --all -a codex -y
 ```
 
-Install the Design Before Code OpenSpec schema directly from the repository subdirectory, without cloning the repository:
+Install the Design Before Code OpenSpec schema directly from the repository subdirectory, without keeping a local clone of this repository:
 
 ```bash
-npx degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
+npx -y degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
 ```
+
+The installer tools may fetch/clone repository content internally while resolving GitHub sources; the user does not need to create or maintain a Design Before Code clone inside the application project.
 
 Validate it:
 
@@ -115,7 +119,7 @@ or make it the project default in `openspec/config.yaml`:
 schema: design-before-code
 ```
 
-This turns a normal OpenSpec project into the Design Before Code workflow without requiring a local clone of this repository.
+This turns a normal OpenSpec project into the Design Before Code workflow without requiring a user-managed local clone of this repository.
 
 See [`docs/INSTALLATION.md`](docs/INSTALLATION.md) for agent selection, updates, manual fallback, and release-pinning guidance.
 
