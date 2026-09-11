@@ -2,9 +2,11 @@
 
 This repository contains independently versioned core Skills. The early `v0.1` / `v0.2` / `v0.2.1` history below records the evolution of `data-model-design`; those entries were **not** repository-wide release tags.
 
-A repository-wide release version will be introduced with the first public alpha. Until then, the version declared inside each Skill is the canonical version for that Skill.
+Repository-wide releases use semantic versions independently of the versions declared inside individual Skills.
 
-## Unreleased — repository alpha preparation
+## v0.1.0-alpha.1 — 2026-09-11
+
+First repository-wide experimental alpha.
 
 ### Current core Skill versions
 
@@ -17,8 +19,8 @@ A repository-wide release version will be introduced with the first public alpha
 
 - Four-Skill greenfield design loop: Business → UX → Data → cross-artifact Readiness.
 - Optional OpenSpec `design-before-code` schema with a human-only approval boundary.
-- Project Charter, Method Synthesis, Evaluation Protocol, Roadmap, installation guidance, and agent-compatibility documentation.
-- Focused regression definitions for the compact v0.2.x correctness fixes discovered during realistic validation.
+- Project Charter, Method Synthesis, Evaluation Protocol, Roadmap, installation guidance, release checklist, and agent-compatibility documentation.
+- Focused regression definitions for compact v0.2.x correctness fixes discovered during realistic validation.
 - First Level 3 benchmark evidence: Employee Training Request + Training Expense Reimbursement.
 - Compact end-to-end documentation example under `examples/quickstart/`.
 
@@ -29,16 +31,20 @@ A repository-wide release version will be introduced with the first public alpha
 - `data-model-design v0.2.3` strengthens dual-path identity, stored-derived-value, and reference+snapshot integrity review.
 - `design-readiness-review` remains v0.2 after correctly detecting and routing cross-artifact reconciliation and reachability defects during the Level 3 benchmark.
 - README and OpenSpec integration documentation now reflect completed Phase C runtime/approval validation and completed Phase D Level 3 readiness validation.
+- Installation and compatibility documentation now distinguish canonical Skill sources, agent-local installed copies, observed compatibility, and unverified portability.
 
 ### Validation evidence
 
 - Phase B cross-artifact smoke: PASS.
 - Phase C OpenSpec orchestration: PASS at the current experimental level, including negative/positive semantic approval-gate behavior and 9/9 planning artifacts without `apply`.
 - Phase D Level 3 domain benchmark: final `READINESS: READY_FOR_HUMAN_APPROVAL`; no implementation performed.
+- Alpha release structural check: project-local OpenSpec schema discovery PASS; YAML/schema/template/dependency-graph validation PASS after installing the bundle into a clean temporary OpenSpec project.
 
 ### Release posture
 
-The project is experimental / alpha-stage. Current work is release hardening: documentation, installation clarity, interoperability claims, packaging consistency, and release hygiene. Another expensive Level 3 benchmark is not required before the first alpha unless a material method change invalidates existing evidence.
+This release is experimental / alpha-stage. It does not claim production stability, support for every coding agent, actor-authenticated approval enforcement from OpenSpec alone, or full legacy/brownfield coverage.
+
+The next work after this alpha is broader real-world usage, focused compatibility evidence, packaging refinement, and correctness fixes driven by observed failures. Another expensive Level 3 benchmark is not required unless a material method change invalidates existing evidence.
 
 ---
 
