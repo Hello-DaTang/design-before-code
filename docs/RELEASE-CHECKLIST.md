@@ -48,7 +48,7 @@ Before creating the tag:
 - [x] Confirm no temporary Phase D OpenSpec artifacts were added to the repository as product templates.
 - [x] Confirm `human-approval.md` remains a human-only contract in integration instructions.
 - [x] Confirm examples are labeled illustrative and evals are labeled evidence, not canonical product designs.
-- [ ] Review `CHANGELOG.md` Unreleased section and freeze release notes.
+- [x] Review `CHANGELOG.md` Unreleased section and freeze release notes as `v0.1.0-alpha.1 — 2026-09-11`.
 
 ### Observed OpenSpec release-check — PASS (2026-09-11)
 
@@ -129,6 +129,6 @@ git tag -a v0.1.0-alpha.1 -m "Design Before Code v0.1.0-alpha.1"
 git push origin v0.1.0-alpha.1
 ```
 
-Then create a GitHub Release from that tag using the finalized `CHANGELOG.md` Unreleased section as the basis for release notes.
+Then create a GitHub Release from that tag using the finalized `CHANGELOG.md` release section as the basis for release notes.
 
 Do not delete or rewrite the Phase B/C/D validation evidence after release; future improvements should append new evidence or focused regressions rather than rewriting history.
