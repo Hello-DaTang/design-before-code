@@ -43,12 +43,34 @@ Before creating the tag:
 - [ ] Verify the four `SKILL.md` frontmatters parse and their names match their directories.
 - [ ] Verify all documented Skill version strings match the files themselves.
 - [ ] Verify README / docs relative links render correctly on GitHub.
-- [ ] Run `openspec schema validate design-before-code` with the documented supported OpenSpec version or current compatible CLI.
+- [ ] Validate the bundled OpenSpec schema **from an initialized temporary/target OpenSpec project after copying the bundle to `openspec/schemas/design-before-code/`**. The repository root is the bundle source, not itself an installed OpenSpec schema location.
 - [ ] Confirm no benchmark-specific domain rule leaked into a core Skill.
 - [ ] Confirm no temporary Phase D OpenSpec artifacts were added to the repository as product templates.
 - [ ] Confirm `human-approval.md` remains a human-only contract in integration instructions.
 - [ ] Confirm examples are labeled illustrative and evals are labeled evidence, not canonical product designs.
 - [ ] Review `CHANGELOG.md` Unreleased section and freeze release notes.
+
+Recommended PowerShell validation from the repository root:
+
+```powershell
+$test = Join-Path $env:TEMP "dbc-openspec-release-check"
+Remove-Item -Recurse -Force $test -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force $test | Out-Null
+
+openspec init $test --tools none
+
+New-Item -ItemType Directory -Force "$test\openspec\schemas" | Out-Null
+Copy-Item -Recurse -Force `
+  ".\integrations\openspec\design-before-code" `
+  "$test\openspec\schemas\"
+
+Push-Location $test
+openspec schema which --all
+openspec schema validate design-before-code --verbose
+Pop-Location
+```
+
+Expected discovery includes a project-local `design-before-code` schema. Validation should pass YAML, schema structure, template references, and dependency-graph checks.
 
 These are structural/release checks. They do **not** require another paid Level 3 model benchmark.
 
