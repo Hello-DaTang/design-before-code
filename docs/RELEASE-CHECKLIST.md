@@ -44,7 +44,7 @@ Before creating the tag:
 - [x] Verify all documented Skill version strings match the files themselves.
 - [ ] Verify README / docs relative links render correctly on GitHub.
 - [x] Validate the bundled OpenSpec schema **from an initialized temporary/target OpenSpec project after installing the bundle to `openspec/schemas/design-before-code/`**. The repository root is the bundle source, not itself an installed OpenSpec schema location.
-- [ ] Verify the recommended **zero-clone install path** from a clean temporary project: `openspec init` → `npx skills add Hello-DaTang/design-before-code --all ...` → `npx degit .../integrations/openspec/design-before-code openspec/schemas/design-before-code` → schema validation.
+- [x] Verify the recommended **zero-clone install path** from a clean temporary project: `openspec init` → `npx skills add Hello-DaTang/design-before-code --all ...` → `npx degit .../integrations/openspec/design-before-code openspec/schemas/design-before-code` → schema validation.
 - [x] Confirm no Phase D benchmark-specific domain rule leaked into a core Skill.
 - [x] Confirm no temporary Phase D OpenSpec artifacts were added to the repository as product templates.
 - [x] Confirm `human-approval.md` remains a human-only contract in integration instructions.
@@ -79,33 +79,64 @@ Validating design-before-code...
 
 Running the same validation command directly from the Design Before Code repository root still reports only `spec-driven`. That is expected: `integrations/openspec/design-before-code/` is the distributable bundle source, while OpenSpec discovers the project schema only after installation to `openspec/schemas/design-before-code/` (or another supported discovery location).
 
-### Zero-clone installation smoke to run before tagging
+### Observed zero-clone installation smoke — PASS (2026-09-11)
 
-Run from any directory; this creates only a temporary test project:
+A clean temporary application project was initialized with:
 
-```powershell
-$test = Join-Path $env:TEMP "dbc-zero-clone-check"
-Remove-Item -Recurse -Force $test -ErrorAction SilentlyContinue
-New-Item -ItemType Directory -Force $test | Out-Null
-Push-Location $test
-
+```text
 openspec init . --tools none
-npx skills add Hello-DaTang/design-before-code --all -a codex -y
-npx degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
-
-openspec schema which --all
-openspec schema validate design-before-code --verbose
-
-Get-ChildItem .agents\skills
-Pop-Location
 ```
 
-Expected result:
+The four Skills were then installed directly from the public GitHub repository through the Skills CLI. Observed result:
 
-- the four core Skills exist in the Codex project-local Skill location;
-- `design-before-code` appears as a project schema;
-- schema validation passes;
-- no Design Before Code repository clone exists inside the temporary application project.
+```text
+Found 4 skills
+Installing all 4 skills
+Installation complete
+```
+
+Installed project-local Skills:
+
+```text
+.agents/skills/business-domain-design
+.agents/skills/data-model-design
+.agents/skills/design-readiness-review
+.agents/skills/ux-flow-design
+```
+
+The Skills CLI reported `Repository cloned` while resolving the GitHub source. This is an internal installer fetch/clone, not a user-managed Design Before Code working clone inside the target application project; the installed project contains the Skill artifacts, not a Design Before Code repository checkout.
+
+The OpenSpec schema was then installed directly from the repository subdirectory with `degit` into:
+
+```text
+openspec/schemas/design-before-code
+```
+
+Observed discovery:
+
+```text
+Project schemas:
+  design-before-code
+
+Package schemas:
+  spec-driven
+```
+
+Observed validation:
+
+```text
+Validating design-before-code...
+  Checking schema.yaml exists...
+  Parsing YAML...
+  Validating schema structure...
+  Checking template files...
+  Dependency graph validation passed (via parseSchema)
+✓ Schema 'design-before-code' is valid
+```
+
+This validates the intended normal-user flow without asking the user to clone or maintain the Design Before Code repository.
+
+The release docs now use `npx -y ...` so npm package installation itself can run non-interactively; the Skills CLI's own `-y` remains present where applicable.
 
 These are structural/release checks. They do **not** require another paid Level 3 model benchmark.
 
@@ -119,7 +150,7 @@ The alpha may claim:
 - one realistic Level 3 readiness benchmark;
 - artifact-based mixed-agent continuation evidence;
 - explicit human approval boundary;
-- zero-clone installation from the public GitHub repository once the smoke above passes.
+- verified zero-clone installation from the public GitHub repository.
 
 The alpha must **not** claim:
 
