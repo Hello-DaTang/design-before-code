@@ -115,6 +115,20 @@ apply
 
 OpenSpec is the orchestration layer, not the identity of this project. The four core Skills remain independently usable.
 
+### See a complete small example
+
+[`examples/quickstart/`](examples/quickstart/) contains a compact Internal Application Access Request example with the full pre-implementation chain:
+
+```text
+requirements
+→ business-model
+→ ux-flow
+→ data-model
+→ design-readiness
+```
+
+It is illustrative documentation, not another benchmark. Use it to understand artifact shape and separation of responsibilities, not as a schema or UI template to copy into unrelated products.
+
 ## Why
 
 AI coding agents can make good implementation progress while silently deciding:
@@ -271,6 +285,8 @@ design-before-code/
 │   └── openspec/
 │       └── design-before-code/
 ├── examples/
+│   ├── quickstart/
+│   └── manufacturing/
 ├── evals/
 ├── ATTRIBUTION.md
 ├── CHANGELOG.md
