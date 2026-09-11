@@ -47,23 +47,25 @@ The core rule is simple:
 
 > AI should not make irreversible product, UX, and data-model decisions silently during implementation.
 
-## Quick start
+## Quick start — no clone required
 
-### Option A — use the Skills directly
+The recommended user path is to install directly from GitHub into the **current project**. Cloning this repository is only needed when you want to contribute to Design Before Code itself.
 
-Install one or more Skill directories from [`skills/`](skills/) into the Skill discovery location supported by your agent.
+Prerequisites:
 
-The project-local layout validated with Codex is:
+- Node.js / `npx` available;
+- an AI coding agent supported by the Skills CLI;
+- OpenSpec only if you want the orchestrated workflow.
 
-```text
-.agents/skills/
-├── business-domain-design/
-├── ux-flow-design/
-├── data-model-design/
-└── design-readiness-review/
+### Option A — install the four Skills only
+
+From your existing project root:
+
+```bash
+npx skills add Hello-DaTang/design-before-code --all -a codex -y
 ```
 
-Then give the agent your requirement and ask it to run the relevant Skill instead of jumping directly into implementation.
+Replace `codex` with the target agent supported by the Skills CLI, for example `github-copilot`, `cursor`, or `claude-code`.
 
 For a full greenfield design pass, use the Skills in this order:
 
@@ -74,46 +76,48 @@ business-domain-design
 → design-readiness-review
 ```
 
-See [`docs/INSTALLATION.md`](docs/INSTALLATION.md) for copy/sync commands and update guidance.
+### Option B — enhance an existing OpenSpec project
 
-### Option B — orchestrate the flow with OpenSpec
-
-An optional custom OpenSpec schema lives at:
-
-[`integrations/openspec/design-before-code/`](integrations/openspec/design-before-code/)
-
-After copying the schema bundle into an initialized OpenSpec project:
+Initialize OpenSpec in your application repository if needed:
 
 ```bash
-openspec schema validate design-before-code
+openspec init
+```
+
+Then install the Skills directly from this repository:
+
+```bash
+npx skills add Hello-DaTang/design-before-code --all -a codex -y
+```
+
+Install the Design Before Code OpenSpec schema directly from the repository subdirectory, without cloning the repository:
+
+```bash
+npx degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
+```
+
+Validate it:
+
+```bash
+openspec schema which design-before-code
+openspec schema validate design-before-code --verbose
+```
+
+Then either use it per change:
+
+```bash
 openspec new change my-feature --schema design-before-code
 ```
 
-The schema orchestrates:
+or make it the project default in `openspec/config.yaml`:
 
-```text
-proposal
-  ↓
-business-model
-  ↓
-ux-flow
-  ↓
-data-model
-  ↓
-design-readiness
-  ↓
-human-approval   ← human-written only
-  ↓
-specs
-  ↓
-technical-design
-  ↓
-tasks
-  ↓
-apply
+```yaml
+schema: design-before-code
 ```
 
-OpenSpec is the orchestration layer, not the identity of this project. The four core Skills remain independently usable.
+This turns a normal OpenSpec project into the Design Before Code workflow without requiring a local clone of this repository.
+
+See [`docs/INSTALLATION.md`](docs/INSTALLATION.md) for agent selection, updates, manual fallback, and release-pinning guidance.
 
 ### See a complete small example
 
