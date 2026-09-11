@@ -1,42 +1,52 @@
 # Installation
 
-Design Before Code can be used in two ways:
+Design Before Code supports a **zero-clone installation path** for normal users.
 
-1. install one or more core Skills and invoke them directly;
-2. optionally add the OpenSpec schema to orchestrate the full artifact workflow.
+You only need to clone this repository if you want to contribute to Design Before Code itself. For ordinary use, install the Skills and optional OpenSpec schema directly from GitHub into your existing project.
 
-OpenSpec is optional. The Skills remain independently usable.
+## 1. Prerequisites
 
-## 1. Get the repository
+For the recommended zero-clone path:
 
-```bash
-git clone https://github.com/Hello-DaTang/design-before-code.git
-cd design-before-code
-```
+- Node.js 20+ with `npx` available;
+- an AI coding agent supported by the Skills CLI;
+- OpenSpec only if you want the orchestrated workflow.
 
-If you already have a clone:
+Check Node / npx:
 
 ```bash
-git pull origin main
+node --version
+npx --version
 ```
 
-The canonical Skill sources live under:
+## 2. Install the Skills directly from GitHub
+
+From your existing application/project root:
+
+```bash
+npx skills add Hello-DaTang/design-before-code --all -a codex -y
+```
+
+This scans the repository's canonical `skills/` directory and installs all four core Skills into the project-local location expected by the selected agent.
+
+Replace `codex` with another agent supported by the Skills CLI, for example:
+
+```bash
+npx skills add Hello-DaTang/design-before-code --all -a github-copilot -y
+npx skills add Hello-DaTang/design-before-code --all -a cursor -y
+npx skills add Hello-DaTang/design-before-code --all -a claude-code -y
+```
+
+The four core Skills are:
 
 ```text
-skills/
-├── business-domain-design/
-├── ux-flow-design/
-├── data-model-design/
-└── design-readiness-review/
+business-domain-design
+ux-flow-design
+data-model-design
+design-readiness-review
 ```
 
-Treat those directories as the source of truth. Agent-local copies are installation artifacts and do not update automatically when this repository changes.
-
-## 2. Install the Skills into a project
-
-Your AI agent must be able to discover project-local Skills. The exact discovery path is agent-specific.
-
-The project-local layout validated during this project's Codex testing is:
+The Codex project-local layout validated by this project is:
 
 ```text
 <target-project>/
@@ -48,39 +58,11 @@ The project-local layout validated during this project's Codex testing is:
         └── design-readiness-review/
 ```
 
-Copy the **whole Skill directory**, not only `SKILL.md`, so any referenced support files remain available.
+Other agents may use different locations; let the Skills CLI perform that mapping instead of manually copying directories when possible.
 
-### Bash / WSL example
+## 3. Use the Skills without OpenSpec
 
-From the target project root:
-
-```bash
-mkdir -p .agents/skills
-
-cp -R /path/to/design-before-code/skills/business-domain-design .agents/skills/
-cp -R /path/to/design-before-code/skills/ux-flow-design .agents/skills/
-cp -R /path/to/design-before-code/skills/data-model-design .agents/skills/
-cp -R /path/to/design-before-code/skills/design-readiness-review .agents/skills/
-```
-
-### PowerShell example
-
-From the target project root:
-
-```powershell
-New-Item -ItemType Directory -Force .agents\skills | Out-Null
-
-Copy-Item -Recurse -Force C:\path\to\design-before-code\skills\business-domain-design .agents\skills\
-Copy-Item -Recurse -Force C:\path\to\design-before-code\skills\ux-flow-design .agents\skills\
-Copy-Item -Recurse -Force C:\path\to\design-before-code\skills\data-model-design .agents\skills\
-Copy-Item -Recurse -Force C:\path\to\design-before-code\skills\design-readiness-review .agents\skills\
-```
-
-If your agent uses a different Skill directory, map the canonical `skills/<name>/` directories to that supported location instead. Do not rename the Skill itself unless the agent requires it.
-
-## 3. Use only the Skills you need
-
-You do not have to install all four Skills for every task.
+OpenSpec is optional. You can use any Skill independently.
 
 Typical standalone use:
 
@@ -104,7 +86,7 @@ business + UX + data artifacts
 → design-readiness-review
 ```
 
-For a full greenfield design pass, install all four and use:
+For a full greenfield design pass:
 
 ```text
 business-domain-design
@@ -113,63 +95,93 @@ business-domain-design
 → design-readiness-review
 ```
 
-A downstream Skill must not silently replace a missing upstream Skill or invent unresolved semantics. If required companion Skills are unavailable, stop and fix the installation instead of falling back invisibly.
+A downstream Skill must not silently replace a missing upstream Skill or invent unresolved semantics. If a required Skill is unavailable, fix the installation instead of falling back invisibly.
 
-## 4. Optional: install the OpenSpec schema
+## 4. Enhance an existing OpenSpec project — no clone required
 
-Prerequisite: the target project is already initialized for OpenSpec.
-
-Copy:
-
-```text
-integrations/openspec/design-before-code/
-```
-
-from this repository to:
-
-```text
-<target-project>/openspec/schemas/design-before-code/
-```
-
-### Bash / WSL
+If the target project is not initialized yet:
 
 ```bash
-mkdir -p openspec/schemas
-cp -R /path/to/design-before-code/integrations/openspec/design-before-code \
-  openspec/schemas/
+openspec init
 ```
 
-### PowerShell
-
-```powershell
-New-Item -ItemType Directory -Force openspec\schemas | Out-Null
-Copy-Item -Recurse -Force `
-  C:\path\to\design-before-code\integrations\openspec\design-before-code `
-  openspec\schemas\
-```
-
-Validate the copied schema:
+Install the four Design Before Code Skills:
 
 ```bash
-openspec schema validate design-before-code
+npx skills add Hello-DaTang/design-before-code --all -a codex -y
+```
+
+Then fetch only the OpenSpec schema subdirectory directly into the current project:
+
+```bash
+npx degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
+```
+
+This downloads the schema files without cloning this repository or adding its Git history to your application repository.
+
+Validate discovery and structure:
+
+```bash
 openspec schema which design-before-code
+openspec schema validate design-before-code --verbose
 ```
 
-Create a change with the schema:
+Expected discovery:
+
+```text
+design-before-code    project
+spec-driven           package
+```
+
+Then either use the schema per change:
 
 ```bash
 openspec new change my-feature --schema design-before-code
 ```
 
-Or make it the project default in `openspec/config.yaml`:
+or make it the project default in `openspec/config.yaml`:
 
 ```yaml
 schema: design-before-code
 ```
 
+At that point the normal OpenSpec project is enhanced with the Design Before Code flow:
+
+```text
+proposal
+→ business-model
+→ ux-flow
+→ data-model
+→ design-readiness
+→ human-approval
+→ specs
+→ technical-design
+→ tasks
+→ apply
+```
+
 The schema expects the four companion Skills to be discoverable by the agent.
 
-## 5. Human approval rule
+## 5. Recommended first-time sequence
+
+For a new/current application repository, the intended user experience is:
+
+```bash
+openspec init
+npx skills add Hello-DaTang/design-before-code --all -a codex -y
+npx degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
+openspec schema validate design-before-code --verbose
+```
+
+Then start a change:
+
+```bash
+openspec new change my-feature --schema design-before-code
+```
+
+No Design Before Code clone is required.
+
+## 6. Human approval rule
 
 The OpenSpec flow intentionally stops at:
 
@@ -189,34 +201,75 @@ Only then should the workflow continue to specs, technical design, and tasks.
 
 OpenSpec artifact dependencies do not authenticate who wrote the approval file. If an organization needs identity-level enforcement, add external CI, hook, or review controls.
 
-## 6. Updating installed Skills
+## 7. Updating an installed project
 
-If you copied the Skills into a project, a later `git pull` in the Design Before Code repository does **not** update those project-local copies.
+### Update Skills
 
-After updating this repository, recopy the Skill directories:
-
-```bash
-git pull origin main
-
-cp -R /path/to/design-before-code/skills/business-domain-design /target/project/.agents/skills/
-cp -R /path/to/design-before-code/skills/ux-flow-design /target/project/.agents/skills/
-cp -R /path/to/design-before-code/skills/data-model-design /target/project/.agents/skills/
-cp -R /path/to/design-before-code/skills/design-readiness-review /target/project/.agents/skills/
-```
-
-Use `-Force` / replacement semantics appropriate to your platform.
-
-For a personal development environment, symlinks can reduce this synchronization work, but copied directories are simpler and more portable for shared projects.
-
-## 7. Verify the installed versions
-
-From the Design Before Code repository:
+Use the Skills CLI update flow when available:
 
 ```bash
-grep -R "Current behavior target" skills/*/SKILL.md
+npx skills update
 ```
 
-At the time of this document:
+Or reinstall this collection from the repository using the same `npx skills add ...` command.
+
+### Update the OpenSpec schema
+
+The schema directory is ordinary project-local content. For an explicit replacement, remove only the installed Design Before Code schema directory, then fetch it again:
+
+#### PowerShell
+
+```powershell
+Remove-Item -Recurse -Force .\openspec\schemas\design-before-code
+npx degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
+openspec schema validate design-before-code --verbose
+```
+
+#### Bash / WSL
+
+```bash
+rm -rf openspec/schemas/design-before-code
+npx degit Hello-DaTang/design-before-code/integrations/openspec/design-before-code openspec/schemas/design-before-code
+openspec schema validate design-before-code --verbose
+```
+
+Do not delete other project-local schemas.
+
+## 8. Version pinning for releases
+
+During active alpha development, the commands above install from the repository's current default branch.
+
+For reproducible release usage, prefer a release/tag-specific GitHub source once the repository-wide tag exists. Both the Skills CLI and `degit` support GitHub refs/tags in their source forms.
+
+Release-specific commands will be documented with each repository release so users can choose between:
+
+- latest/default branch for active testing;
+- a pinned alpha/stable tag for reproducible installation.
+
+## 9. Manual clone/copy fallback
+
+Cloning remains useful for project contributors, offline/local modification, or environments where `npx` cannot be used:
+
+```bash
+git clone https://github.com/Hello-DaTang/design-before-code.git
+cd design-before-code
+```
+
+The canonical Skill sources are under:
+
+```text
+skills/
+```
+
+and the OpenSpec bundle is under:
+
+```text
+integrations/openspec/design-before-code/
+```
+
+If manually copying a Skill, copy the **whole Skill directory**, not only `SKILL.md`, so referenced support files remain available.
+
+## 10. Current Skill versions
 
 ```text
 business-domain-design   v0.2.2
@@ -225,9 +278,7 @@ data-model-design        v0.2.3
 design-readiness-review  v0.2
 ```
 
-If a project-local copy reports older versions, refresh that copy from the canonical `skills/` directory.
-
-## 8. Recommended first use
+## 11. Recommended first use
 
 Start with a real but bounded greenfield requirement. Do not start with a giant legacy system or organization-wide architecture exercise.
 
