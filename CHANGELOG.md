@@ -1,6 +1,48 @@
 # Changelog
 
-## v0.2.1 — 2026-09-10
+This repository contains independently versioned core Skills. The early `v0.1` / `v0.2` / `v0.2.1` history below records the evolution of `data-model-design`; those entries were **not** repository-wide release tags.
+
+A repository-wide release version will be introduced with the first public alpha. Until then, the version declared inside each Skill is the canonical version for that Skill.
+
+## Unreleased — repository alpha preparation
+
+### Current core Skill versions
+
+- `business-domain-design` — v0.2.2
+- `ux-flow-design` — v0.2.1
+- `data-model-design` — v0.2.3
+- `design-readiness-review` — v0.2
+
+### Added
+
+- Four-Skill greenfield design loop: Business → UX → Data → cross-artifact Readiness.
+- Optional OpenSpec `design-before-code` schema with a human-only approval boundary.
+- Project Charter, Method Synthesis, Evaluation Protocol, Roadmap, installation guidance, and agent-compatibility documentation.
+- Focused regression definitions for the compact v0.2.x correctness fixes discovered during realistic validation.
+- First Level 3 benchmark evidence: Employee Training Request + Training Expense Reimbursement.
+- Compact end-to-end documentation example under `examples/quickstart/`.
+
+### Changed
+
+- `business-domain-design v0.2.2` adds mandatory reconciliation after a human resolves a previously open consequential decision.
+- `ux-flow-design v0.2.1` makes unresolved consequential choices uninstantiated and adds reachability / gate-algebra review for exception flows.
+- `data-model-design v0.2.3` strengthens dual-path identity, stored-derived-value, and reference+snapshot integrity review.
+- `design-readiness-review` remains v0.2 after correctly detecting and routing cross-artifact reconciliation and reachability defects during the Level 3 benchmark.
+- README and OpenSpec integration documentation now reflect completed Phase C runtime/approval validation and completed Phase D Level 3 readiness validation.
+
+### Validation evidence
+
+- Phase B cross-artifact smoke: PASS.
+- Phase C OpenSpec orchestration: PASS at the current experimental level, including negative/positive semantic approval-gate behavior and 9/9 planning artifacts without `apply`.
+- Phase D Level 3 domain benchmark: final `READINESS: READY_FOR_HUMAN_APPROVAL`; no implementation performed.
+
+### Release posture
+
+The project is experimental / alpha-stage. Current work is release hardening: documentation, installation clarity, interoperability claims, packaging consistency, and release hygiene. Another expensive Level 3 benchmark is not required before the first alpha unless a material method change invalidates existing evidence.
+
+---
+
+## `data-model-design` v0.2.1 — 2026-09-10
 
 This patch release was driven by review of the v0.2 manufacturing regression run.
 
@@ -34,7 +76,7 @@ The v0.2 run successfully caught transitive redundancy, late-entry business-time
 
 v0.2.1 generalizes those failures while preserving the project's core goal: expose consequential design choices for human review before implementation.
 
-## v0.2 — 2026-09-10
+## `data-model-design` v0.2 — 2026-09-10
 
 This release was driven by an A/B evaluation of the same manufacturing requirement with and without `data-model-design`.
 
@@ -73,7 +115,7 @@ The v0.1 skill already improved human reviewability, scenario simulation, and ex
 
 v0.2 turns those observed failures into explicit rules and regression tests.
 
-## v0.1 — 2026-09-10
+## `data-model-design` v0.1 — 2026-09-10
 
 Initial experimental release of `data-model-design` with:
 
