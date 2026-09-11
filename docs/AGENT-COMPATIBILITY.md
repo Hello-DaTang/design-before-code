@@ -11,7 +11,7 @@ This document distinguishes **observed compatibility** from **expected compatibi
 | Level | Meaning |
 |---|---|
 | **Verified** | The agent was exercised against the relevant Design Before Code workflow and the observed behavior was recorded. |
-| **Interoperability verified** | The agent successfully continued from artifacts produced by another agent, but was not independently tested through the entire clean-start workflow. |
+| **Interoperability verified** | A mixed-agent handoff successfully continued from artifacts produced by another agent, but the second provider is not promoted to full standalone support by that evidence alone. |
 | **Structurally compatible / unverified** | The project format should be portable, but no project evidence currently supports a stronger claim. |
 
 ## Current evidence
@@ -43,17 +43,17 @@ The second coding agent successfully continued from repository artifacts already
 
 This is meaningful interoperability evidence because Design Before Code relies on explicit artifacts rather than hidden conversation state.
 
-It does **not** prove that every coding agent will discover or invoke Skills using the same directory convention or instruction mechanism.
+The benchmark record intentionally identifies the continuation as a **second agent** rather than using that run to make a stronger provider-specific support claim.
 
 See [`../evals/level3-training-reimbursement.md`](../evals/level3-training-reimbursement.md).
 
 ## GitHub Copilot / VS Code agent workflows
 
-The project has practical mixed-agent continuation evidence from the current development workflow, but we do not yet treat GitHub Copilot as independently verified through a clean-start, full OpenSpec 0→planning-complete run.
+Current status:
 
-Recommended status:
+**Structurally compatible / provider-specific verification pending.**
 
-**Interoperability verified; full standalone workflow not yet separately benchmarked.**
+The project has practical mixed-agent continuation evidence from its development workflow, but the recorded Phase D evidence is not treated as a clean-start, provider-specific Copilot benchmark.
 
 When using Copilot or another VS Code agent, ensure that:
 
@@ -64,6 +64,8 @@ When using Copilot or another VS Code agent, ensure that:
 5. human approval remains human-only.
 
 If the agent does not natively discover `.agents/skills/`, map the canonical [`../skills/`](../skills/) directories into whatever instruction/Skill mechanism that agent supports. Do not assume Codex's tested discovery path is universal.
+
+A future focused compatibility check may promote this status without requiring another full Level 3 domain benchmark.
 
 ## Claude Code, Cursor, Gemini CLI, and other agents
 
@@ -123,6 +125,6 @@ For a new agent, start with a compact check:
 4. verify it writes/continues from a disk artifact;
 5. verify it stops rather than silently resolving a human-owned decision.
 
-Only promote the agent to **Verified** after enough evidence exists for the claim being made.
+Only promote an agent/provider to **Verified** after enough evidence exists for the claim being made.
 
 This follows [`EVALUATION-PROTOCOL.md`](EVALUATION-PROTOCOL.md): compatibility evidence should be proportional to the risk and release claim, not an excuse for repeated expensive E2E runs.
